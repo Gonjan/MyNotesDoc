@@ -1,0 +1,35 @@
+部署到javaEE容器
+
+修改启动类，继承 SpringBootServletInitializer 并重写 configure 方法
+[java] view plain copy print?在CODE上查看代码片派生到我的代码片
+public class SpringBootSampleApplication extends SpringBootServletInitializer{  
+  
+    private static final Logger logger = LoggerFactory.getLogger(SpringBootSampleApplication.class);  
+  
+    @Override  
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {  
+        return builder.sources(this.getClass());  
+    }  
+  
+}  
+
+修改pom文件中jar 为 war
+
+<!-- <packaging>jar</packaging> -->  
+<packaging>war</packaging>  
+
+
+修改pom，排除tomcat插件
+
+<dependency>  
+           <groupId>org.springframework.boot</groupId>  
+           <artifactId>spring-boot-starter-web</artifactId>  
+           <exclusions>  
+               <exclusion>  
+                   <groupId>org.springframework.boot</groupId>  
+                   <artifactId>spring-boot-starter-tomcat</artifactId>  
+               </exclusion>  
+           </exclusions>  
+       </dependency>  
+
+打包部署到容器 

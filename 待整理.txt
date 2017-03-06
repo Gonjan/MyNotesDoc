@@ -1,0 +1,19 @@
+1、spring boot mvn打包放到linux下tomcat服务器
+
+2、mvn手动添加本地库
+
+3、socket中的connection reset异常
+
+4，github使用整理
+
+5、Mybatis-util整理代码。
+
+6、github 整理maven库
+
+7、Mybatis的分页实现
+
+8、封装利用response写回json数据
+
+9、NIO的个人理解整理
+
+10、SpringMVC的异步模式

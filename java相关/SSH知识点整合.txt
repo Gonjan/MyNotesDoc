@@ -1,0 +1,1843 @@
+1、Hibernate工作原理及为什么要用？
+
+1.       答：hibernate，通过对jdbc进行封装，对 java类和关系数据库进行mapping，实现了对关系数据库的面向对象方式的操作.
+1.对JDBC访问数据库的代码做了封装，大大简化了数据访问层繁琐的重复性代码。 hibernate的性能非常好，因为它是个轻量级框架。
+
+1.它支持各种关系数据库，从一对一到多对多的各种复杂关系。
+
+1).读取并解析配置文件
+2).读取并解析映射信息，创建SessionFactory
+3).打开Sesssion
+4).创建事务Transation
+5).持久化操作
+6).提交事务
+7).关闭Session
+8).关闭SesstionFactory
+
+2.什么是Hibernate延迟加载?
+延迟加载机制是为了避免一些无谓的性能开销而提出来的，所谓延迟加载就是当在真正需要数据的时候，才真正执行数据加载操作。
+
+ 答：对象关系映射（Object—Relational Mapping，简称 ORM）是一种为了解决
+面向对象与面向关系数据库存在的互不匹配的现象的技术；
+
+3.数据库，比如 100 用户同时来访，要采取什么技术解决？
+
+答：可采用连接池。
+
+ 
+
+ 
+
+4.什么是 ORM？
+答：对象关系映射（Object—Relational Mapping，简称 ORM）是一种为了解决
+
+面向对象与面向关系数据库存在的互不匹配的现象的技术；
+
+ 
+
+5.Hibernate 有哪 5 个核心接口？
+
+Configuration 接口：配置 Hibernate，根据其启动 hibernate，创建SessionFactory 对象
+SessionFactory 接口：初始化 Hibernate，充当数据存储源的代理，创建session 对象sessionFactory 是线程安全的.
+Session 接口：负责保存、更新、删除、加载和查询对象，是线程不安全的，避免多个线程共享同一个 session，是轻量级、一级缓存；
+Transaction (tr?n'z?k??n) 接口：管理事务；
+Query 和 Criteria([krai'ti?ri?]) 接口：执行数据库的查询。
+
+ 
+
+6.关于 hibernate: 【基础】
+1）在 hibernate 中，在配置文件呈标题一对多，多对多的标签是什么；
+2）Hibernate 的二级缓存是什么；
+
+Hibernate 是如何处理事务的；
+答： 1）一对多的标签为<one-to-many> ；多对多的标签为<many-to-many>；
+2）sessionFactory 的缓存为 hibernate 的二级缓存；
+3）Hibernate 的事务实际上是底层的 JDBC Transaction 的封装或者是 JTA
+
+Transaction 的封装；默认情况下使用 JDBCTransaction。
+
+ 
+7.Hibernate 的应用（Hibernate 的结构）？【基础】
+
+答：
+
+//首先获得 SessionFactory 的对象
+SessionFactory sessionFactory = new Configuration().configure().
+
+                                         buildSessionFactory();
+
+  
+//然后获得 session 的对象
+
+       Session session = sessionFactory.openSession();
+
+ //其次获得 Transaction 的对象
+
+ Transaction tx = session.beginTransaction();
+
+//执行相关的数据库操作:增,删,改,查
+
+session.save(user);
+
+//增加, user 是 User 类的对象
+
+session.delete(user);
+
+//删除
+ session.update(user);
+
+//更新
+
+Query query = session.createQuery(“from User”);
+
+//查询
+
+ List list = query.list();
+
+//提交事务
+
+tx.commit();
+
+//如果有异常,我们还要作事务的回滚,恢复到操作之前
+
+tx.rollback();
+
+ //最后还要关闭 session,释放资源
+
+  session.close();
+
+ 
+
+ 
+
+8.Hibernate的查询方式
+
+ 
+
+ 
+
+本地SQL查询、Criteria、Hql
+
+ 
+
+9.说说在hibernate中使用Integer做映射和使用int做映射之间有什么差别
+
+ 
+
+Integer?? code和int?? code;的区别:Integer是对象.???? code?? =?? null;?? 对象可以为空.? int?? 是普通类型,???? 不可能?? =?? null.????? 根据你的数据库code是可以空的,?? 故应该映射成Integer.?
+
+ 
+
+ 
+
+10.请说出Hibernate中持久化对象的生命周期以及各种状态直接的区别，并描述相互之间是如何转换的？
+
+ 
+
+ 
+
+Hibernate中持久化对象的生命周期有临时态、持久态和游离态三种。
+
+ 
+
+处于临时态的对象主键值为空，并且未与session关联，数据未保存到数据库中
+
+处于持久态的对象与session关联起来，持久化后对象中的数据被保存到数据库中，并且主键值按照.hbm.xml文件中配置的生成方式生成相应的值
+
+处于游离态的对象脱离了session的管理，是持久化后的一种状态，主键值按照.hbm.xml文件中配置的生成方式生成相应的值
+
+当new一个新的对象时，该对象处于临时态
+
+当该对象被当作session的参数使用的时候，该对象处于持久态
+
+事务提交，session关闭后，该对象处于游离态
+
+ 
+
+ 
+
+ 
+
+11.用Hibernate的session时要注意几点
+
+ 
+
+ 
+
+1).在更新数据时,要用open()
+
+ 
+
+2).使用完之后,要close(),这样连接池会回收该连接。
+
+ 
+
+ 
+
+12.Spring和Hibernate的事务管理方式有什么不同？
+
+ 
+
+ 
+
+hibernate的事务管理方式仅仅就是托管给JDBC（如果用JTA那么就是JTA），而JDBC的一切行为包括事务是基于一个connection的.
+
+spring也是调用hibernate中事务管理的API。hibernate的事务管理，一般是编程性的。
+
+ 
+
+ 
+
+13.Hibernate如何获取指定主键id的某对象，请举例，并进行可能的优劣
+
+ 
+
+比较
+
+三种方式：get()，load()和find()
+
+Get()和load()是先在缓存中查找对象，如果找不到再去数据库中查询；
+
+Find()是无论何时都在数据库中查询对象。
+
+ 
+
+ 
+
+14.请描述Hibernate中的缓存机制
+
+ 
+
+第一级是Session的缓存。由于Session对象的生命周期通常对应一个数据库事务或者一个应用事务，因此它的缓存是事务范围的缓存。
+
+ 
+
+第二级缓存是一个可插拔的的缓存插件，它是由SessionFactory负责管理。由于SessionFactory对象的生命周期和应用程序的整个过程对应，因此第二级缓存是进程范围或者集群范围的缓存。
+
+ 
+
+ 
+
+15.Hibernate的二级缓存策略的一般过程如下：
+
+ 
+
+ 
+
+1) 条件查询的时候，总是发出一条select * from table_name where …. （选择所有字段）这样的SQL语句查询数据库，一次获得所有的数据对象。
+
+ 
+
+2) 把获得的所有数据对象根据ID放入到第二级缓存中。
+
+ 
+
+3) 当Hibernate根据ID访问数据对象的时候，首先从Session一级缓存中查；查不到，如果配置了二级缓存，那么从二级缓存中查；查不到，再查询数据库，把结果按照ID放入到缓存。
+
+ 
+
+ 
+
+ 
+
+16.get与load区别
+
+ 
+
+1：如果数据库中，没有userId的对象。如果通过get方法加载，则返回的是一个null；如果通过load加载，则返回一个代理对象，如果后面代码如果调用user对象的某个属性（比如user.getPassword()）会抛出异常：org.hibernate.ObjectNotFoundException；
+
+区别2：load支持延迟加载，get不支持延迟加载。
+
+ 
+
+ 
+
+s1.什么是重量级？什么是轻量级？【基础】
+
+ 
+
+ 
+
+答：轻量级是指它的创建和销毁不需要消耗太多的资源，意味着可以在程序中经
+
+常创建和销毁 session 的对象；重量级意味不能随意的创建和销毁它的实例，会
+
+占用很多的资源.
+
+ 
+
+ 
+
+s2.事务处理？【基础】
+
+ 
+
+ 
+
+答：Connection 类中提供了 3 个事务处理方法：
+
+   setAutoCommit(Boolean autoCommit):设置是否自动提交事务，默认为自动
+
+提交事务，即为 true，通过设置 false 禁止自动提交事务；
+
+   commit():提交事务；
+
+   rollback():回滚事务。
+
+ 
+
+ 
+
+ 
+
+s3.Java 中访问数据库的步骤？Statement 和 PreparedStatement 之间的区别？【基础】
+
+ 
+
+ 
+
+答：Java 中访问数据库的步骤如下：
+
+ 
+
+   1）注册驱动；
+
+ 
+
+ 2）建立连接；
+
+ 
+
+ 3）创建 Statement；
+
+ 
+
+ 4）执行 sql 语句；
+
+  
+
+5）处理结果集（若 sql 语句为查询语句）；
+
+ 
+
+ 6）关闭连接。
+
+ 
+
+ PreparedStatement 被创建时即指定了 SQL 语句，通常用于执行多次结构相
+
+同的 SQL 语句。
+
+ 
+
+ 
+
+s4.JDBC，Hibernate 分页怎样实现？【中等难度】
+
+ 
+
+答：方法分别为：
+
+ 
+
+1)      Hibernate 的分页：
+
+ 
+
+Query query = session.createQuery("from Student");
+
+ 
+
+query.setFirstResult(firstResult);
+
+ 
+
+//设置每页开始的记录号
+
+ 
+
+query.setMaxResults(resultNumber);
+
+ 
+
+//设置每页显示的记录数
+
+ 
+
+Collection students = query.list();
+
+ 
+
+ 
+
+s5.如何优化Hibernate？
+
+ 
+
+ 
+
+1.使用双向一对多关联，不使用单向一对多
+
+ 
+
+2.不用一对一，用多对一取代
+
+ 
+
+ 
+
+3.配置对象缓存，不使用集合缓
+
+ 
+
+         
+
+ 
+
+                                             S2SH经典面试题：
+
+Struts2面试题
+
+struts2工作流程
+
+ 
+
+Struts 2框架本身大致可以分为3个部分：
+
+核心控制器FilterDispatcher、业务控制器Action和用户实现的企业业务逻辑组件。
+
+核心控制器FilterDispatcher是Struts 2框架的基础，
+
+包含了框架内部的控制流程和处理机制。
+
+业务控制器Action和业务逻辑组件是需要用户来自己实现的。
+
+用户在开发Action和业务逻辑组件的同时，还需要编写相关的配置文件，
+
+供核心控制器FilterDispatcher来使用。
+
+Struts 2的工作流程相对于Struts 1要简单，与WebWork框架基本相同，
+
+所以说Struts 2是WebWork的升级版本。基本简要流程如下：
+
+1 、客户端初始化一个指向Servlet容器的请求；
+
+2、 这个请求经过一系列的过滤器（Filter）
+
+（这些过滤器中有一个叫做ActionContextCleanUp的可选过滤器，
+
+  这个过滤器对于Struts2和其他框架的集成很有帮助，例如：SiteMesh Plugin）
+
+3 、接着FilterDispatcher被调用，
+
+     FilterDispatcher询问ActionMapper来决定这个请是否需要调用某个Action
+
+4、如果ActionMapper决定需要调用某个Action，
+
+     FilterDispatcher把请求的处理交给ActionProxy
+
+5、ActionProxy通过Configuration Manager询问框架的配置文件，
+
+     找到需要调用的Action类
+
+6、ActionProxy创建一个ActionInvocation的实例。
+
+7、ActionInvocation实例使用命名模式来调用，
+
+     在调用Action的过程前后，涉及到相关拦截器（Intercepter）的调用。
+
+8、一旦Action执行完毕，ActionInvocation负责根据struts.xml中的配置找到对应的返回结果   。返回结果通常是（但不总是，也可 能是另外的一个Action链）一个需要被表示的JSP或者FreeMarker的模版。    在表示的过程中可以使用Struts2 框架中继承的标签。   在这个过程中需要涉及到ActionMapper
+
+9、响应的返回是通过我们在web.xml中配置的过滤器
+10、如果ActionContextCleanUp是当前使用的，则FilterDispatecher将不会清理sreadlocalActionContext;如果ActionContextCleanUp不使用，则将会去清理sreadlocals。
+
+Struts工作机制？
+
+工作机制：
+Struts的工作流程:
+在web应用启动时就会加载初始化ActionServlet,ActionServlet从
+struts-config.xml文件中读取配置信息,把它们存放到各种配置对象
+当ActionServlet接收到一个客户请求时,将执行如下流程.
+-(1)检索和用户请求匹配的ActionMapping实例,如果不存在,就返回请求路径无效信息;
+-(2)如果ActionForm实例不存在,就创建一个ActionForm对象,把客户提交的表单数据保存到ActionForm对象中;
+-(3)根据配置信息决定是否需要表单验证.如果需要验证,就调用ActionForm的validate()方法;
+-(4)如果ActionForm的validate()方法返回null或返回一个不包含ActionMessage的ActuibErrors对象, 就表示表单验证成功;
+-(5)ActionServlet根据ActionMapping所包含的映射信息决定将请求转发给哪个Action,如果相应的Action实例不存在,就先创建这个实例,然后调用Action的execute()方法;
+-(6)Action的execute()方法返回一个ActionForward对象,ActionServlet在把客户请求转发给 ActionForward对象指向的JSP组件;
+-(7)ActionForward对象指向JSP组件生成动态网页,返回给客户;
+
+说下Struts的设计模式
+
+MVC模式: web应用程序启动时就会加载并初始化ActionServler。用户提交表单时，一个配置好的ActionForm对象被创建，并被填入表单相应的数据，ActionServler根据Struts-config.xml文件配置好的设置决定是否需要表单验证，如果需要就调用ActionForm的Validate（）验证后选择将请求发送到哪个Action，如果Action不存在，ActionServlet会先创建这个对象，然后调用Action的execute（）方法。Execute（）从ActionForm对象中获取数据，完成业务逻辑，返回一个ActionForward对象，ActionServlet再把客户请求转发给ActionForward对象指定的jsp组件，ActionForward对象指定的jsp生
+
+成动态的网页，返回给客户。
+
+拦截器和过滤器的区别
+
+1、拦截器是基于java反射机制的，而过滤器是基于函数回调的。
+2、过滤器依赖于servlet容器，而拦截器不依赖于servlet容器。
+3、拦截器只能对Action请求起作用，而过滤器则可以对几乎所有请求起作用。
+4、拦截器可以访问Action上下文、值栈里的对象，而过滤器不能。
+5、在Action的生命周期中，拦截器可以多次调用，而过滤器只能在容器初始化时被调用一次。
+
+struts1于struts2的比较
+
+1、Action   类: 
+    Struts1要求Action类继承一个抽象基类。Struts1的一个普遍问题是使用抽象类编程而不是接口。 
+  Struts   2   Action类可以实现一个Action接口，也可实现其他接口，使可选和定制的服务成为可能。Struts2提供一个ActionSupport基类去 实现常用的接口。Action接口不是必须的，任何有execute标识的POJO对象都可以用作Struts2的Action对象。
+2、线程模式: 
+    Struts1   Action是单例模式并且必须是线程安全的，因为仅有Action的一个实例来处理所有的请求。单例策略限制了Struts1  Action能作的事，并且要在开发时特别小心。Action资源必须是线程安全的或同步的。 
+Struts2   Action对象为每一个请求产生一个实例，因此没有线程安全问题。（实际上，servlet容器给每个请求产生许多可丢弃的对象，并且不会导致性能和垃圾回收问题）
+3、Servlet   依赖: 
+    Struts1   Action   依赖于Servlet  API   ,因为当一个Action被调用时HttpServletRequest   和  HttpServletResponse   被传递给execute方法。 
+Struts   2   Action不依赖于容器，允许Action脱离容器单独被测试。如果需要，Struts2   Action仍然可以访问初始的request和response。但是，其他的元素减少或者消除了直接访问HttpServetRequest  和   HttpServletResponse的必要性。
+4、可测性: 
+   测试Struts1   Action的一个主要问题是execute方法暴露了servlet   API（这使得测试要依赖于容器）。一个第三方扩展－－Struts   TestCase－－提供了一套Struts1的模拟对象（来进行测试）。
+Struts   2   Action可以通过初始化、设置属性、调用方法来测试，“依赖注入”支持也使测试更容易。 
+5、捕获输入: 
+   Struts1   使用ActionForm对象捕获输入。所有的ActionForm必须继承一个基类。因为其他JavaBean不能用作ActionForm，开发者经 常创建多余的类捕获输入。动态Bean（DynaBeans）可以作为创建传统ActionForm的选择，但是，开发者可能是在重新描述(创建)已经存 在的JavaBean（仍然会导致有冗余的javabean）。
+Struts   2直接使用Action属性作为输入属性，消除了对第二个输入对象的需求。输入属性可能是有自己(子)属性的rich对象类型。Action属性能够通过   web页面上的taglibs访问。Struts2也支持ActionForm模式。rich对象类型，包括业务对象，能够用作输入/输出对象。这种   ModelDriven   特性简化了taglib对POJO输入对象的引用。
+6、表达式语言： 
+   Struts1   整合了JSTL，因此使用JSTL   EL。这种EL有基本对象图遍历，但是对集合和索引属性的支持很弱。
+Struts2可以使用JSTL，但是也支持一个更强大和灵活的表达式语言－－ "Object   Graph   Notation   Language "  (OGNL).
+7、绑定值到页面（view）: 
+   Struts   1使用标准JSP机制把对象绑定到页面中来访问。
+   Struts   2   使用  "ValueStack "技术，使taglib能够访问值而不需要把你的页面（view）和对象绑定起来。ValueStack策略允许通过一系列名称相同但类型不同的属性重用页面（view）。
+8、类型转换： 
+   Struts   1   ActionForm   属性通常都是String类型。Struts1使用Commons-Beanutils进行类型转换。每个类一个转换器，对每一个实例来说是不可配置的。
+  Struts2   使用OGNL进行类型转换。提供基本和常用对象的转换器。
+9、校验： 
+   Struts   1支持在ActionForm的validate方法中手动校验，或者通过Commons   Validator的扩展来校验。同一个类可以有不同的校验内容，但不能校验子对象。
+   Struts2支持通过validate方法和XWork校验框架来进行校验。XWork校验框架使用为属性类类型定义的校验和内容校验，来支持chain校验子属性
+10、Action执行的控制： 
+   Struts1支持每一个模块有单独的Request  Processors（生命周期），但是模块中的所有Action必须共享相同的生命周期。 
+   Struts2支持通过拦截器堆栈（Interceptor   Stacks）为每一个Action创建不同的生命周期。堆栈能够根据需要和不同的Action一起使用。
+
+为什么要使用Struts2
+
+Struts2 是一个相当强大的JavaWeb开源框架，是一个基于POJO的Action的MVC Web框架。它基于当年的Webwork和XWork框架，继承其优点，同时做了相当的改进。
+1.Struts2基于MVC架构，框架结构清晰，开发流程一目了然，开发人员可以很好的掌控开发的过程。
+2使用OGNL进行参数传递。
+OGNL提供了在Struts2里访问各种作用域中的数据的简单方式，你可以方便的获取Request，Attribute，Application，Session，Parameters中的数据。大大简化了开发人员在获取这些数据时的代码量。
+3强大的拦截器
+Struts2 的拦截器是一个Action级别的AOP，Struts2中的许多特性都是通过拦截器来实现的，例如异常处理，文件上传，验证等。拦截器是可配置与重用的，可以将一些通用的功能如：登录验证，权限验证等置于拦截器中以完成一些Java Web项目中比较通用的功能。在我实现的的一Web项目中，就是使用Struts2的拦截器来完成了系统中的权限验证功能。
+4易于测试
+Struts2的Action都是简单的POJO，这样可以方便的对Struts2的Action编写测试用例，大大方便了5Java Web项目的测试。
+易于扩展的插件机制在Struts2添加扩展是一件愉快而轻松的事情，只需要将所需要的Jar包放到WEB-INF/lib文件夹中，在struts.xml中作一些简单的设置就可以实现扩展。
+6模块化管理
+Struts2已经把模块化作为了体系架构中的基本思想，可以通过三种方法来将应用程序模块化：将配置信息拆分成多个文件把自包含的应用模块创建为插件创建新的框架特性，即将与特定应用无关的新功能组织成插件，以添加到多个应用中去。
+7全局结果与声明式异常
+为应用程序添加全局的Result，和在配置文件中对异常进行处理，这样当处理过程中出现指定异常时，可以跳转到特定页面。
+他的如此之多的优点，是很多人比较的青睐，与spring ,Hibernate进行结合，组成了现在比较流行的ssh框架，当然每个公司都要自己的框架，也是ssh变异的产品。
+
+struts2有哪些优点？
+
+1）在软件设计上Struts2的应用可以不依赖于Servlet API和struts API。 Struts2的这种设计属于无侵入式设计；  
+
+2）拦截器，实现如参数拦截注入等功能；  
+
+3）类型转换器，可以把特殊的请求参数转换成需要的类型；  
+
+4）多种表现层技术，如：JSP、freeMarker、Velocity等；  
+
+5）Struts2的输入校验可以对指定某个方法进行校验；  
+
+6）提供了全局范围、包范围和Action范围的国际化资源文件管理实现 
+
+struts2是如何启动的？
+
+ struts2框架是通过Filter启动的，即StrutsPrepareAndExecuteFilter，此过滤器为struts2的核心过滤器；  
+
+StrutsPrepareAndExecuteFilter的init()方法中将会读取类路径下默认的配置文件struts.xml完成初始化操作。struts2读取到struts.xml的内容后，是将内容封装进javabean对象然后存放在内存中，以后用户的每次请求处理将使用内存中的数据，而不是每次请求都读取struts.xml文件。
+
+struts2框架的核心控制器是什么？它有什么作用？  
+
+1）Struts2框架的核心控制器是StrutsPrepareAndExecuteFilter。  
+
+2）作用：  
+
+ 负责拦截由<url-pattern>/*</url-pattern>指定的所有用户请求，当用户请求到达时，该Filter会过滤用户的请求。默认情况下，如果用户请求的路径  
+
+不带后缀或者后缀以.action结尾，这时请求将被转入struts2框架处理，否则struts2框架将略过该请求的处理。  
+
+可以通过常量"struts.action.extension"修改action的后缀，如：  
+
+<constant name="struts.action.extension" value="do"/>  
+
+如果用户需要指定多个请求后缀，则多个后缀之间以英文逗号（,）隔开。
+
+<constant name="struts.action.extension" value="do,go"/>  
+
+struts2配置文件的加载顺序？  
+
+struts.xml ——> struts.properties  
+
+常量可以在struts.xml或struts.properties中配置，如果在多个文件中配置了同一个常量，则后一个文件中配置的常量值会覆盖前面文件中配置的常量值.  
+
+struts.xml文件的作用：通知Struts2框架加载对应的Action资源
+
+struts2常量的修改方式？  
+
+常量可以在struts.xml或struts.properties中配置，两种配置方式如下：  
+
+1）在struts.xml文件中配置常量  
+
+<constant name="struts.action.extension" value="do"/>  
+
+2）在struts.properties中配置常量（struts.properties文件放置在src下）：  
+
+struts.action.extension=do
+
+struts2如何访问HttpServletRequest、HttpSession、ServletContext三个域对象？  
+
+方案一：  
+
+HttpServletRequestrequest =ServletActionContext.getRequest();  
+
+HttpServletResponse response =ServletActionContext.getResponse();  
+
+HttpSession  session=   request.getSession(); 
+
+ServletContextservletContext=ServletActionContext.getServletContext();  
+
+方案二：  
+
+类 implements ServletRequestAware,ServletResponseAware，SessionAware，ServletContextAware  
+
+注意：框架自动传入对应的域对象 
+
+struts2是如何管理action的？这种管理方式有什么好处？  
+
+struts2框架中使用包来管理Action，包的作用和java中的类包是非常类似的。  
+
+主要用于管理一组业务功能相关的action。在实际应用中，我们应该把一组业务功能相关的Action放在同一个包下。  
+
+struts2中的默认包struts-default有什么作用？  
+
+1）struts-default包是由struts内置的，它定义了struts2内部的众多拦截器和Result类型，而Struts2很多核心的功能都是通过这些内置的拦截器实现，如：从请求中  
+
+把请求参数封装到action、文件上传和数据验证等等都是通过拦截器实现的。当包继承了struts-default包才能使用struts2为我们提供的这些功能。   
+
+2）struts-default包是在struts-default.xml中定义，struts-default.xml也是Struts2默认配置文件。 Struts2每次都会自动加载 struts-default.xml文件。  
+
+3）通常每个包都应该继承struts-default包。      
+
+struts2如何对指定的方法进行验证？  
+
+1）validate()方法会校验action中所有与execute方法签名相同的方法；  
+
+2）要校验指定的方法通过重写validateXxx()方法实现， validateXxx()只会校验action中方法名为Xxx的方法。其中Xxx的第一个字母要大写；  
+
+3）当某个数据校验失败时，调用addFieldError()方法往系统的fieldErrors添加校验失败信息（为了使用addFieldError()方法，action可以继承ActionSupport）， 如果系统 的fieldErrors包含失败信息，struts2会将请求转发到名为input的result；  
+
+4）在input视图中可以通过<s:fielderror/>显示失败信息。  
+
+5）先执行validateXxxx()->validate()->如果出错了，会转发<result name="input"/>所指定的页面，如果不出错，会直接进行Action::execute()方法 
+
+struts2默认能解决get和post提交方式的乱码问题吗？  
+
+不能。struts.i18n.encoding=UTF-8属性值只能解析POST提交下的乱码问题。 
+
+请你写出struts2中至少5个的默认拦截器？  
+
+fileUpload      提供文件上传功能  
+
+i18n            记录用户选择的locale  
+
+cookies         使用配置的name,value来是指cookies  
+
+checkbox        添加了checkbox自动处理代码，将没有选中的checkbox的内容设定为false，而html默认情况下不提交没有选中的checkbox。  
+
+chain           让前一个Action的属性可以被后一个Action访问，现在和chain类型的result（）结合使用。  
+
+alias           在不同请求之间将请求参数在不同名字件转换，请求内容不变 
+
+值栈ValueStack的原理与生命周期？  
+
+1）ValueStack贯穿整个 Action 的生命周期，保存在request域中，所以ValueStack和request的生命周期一样。当Struts2接受一个请求时，会迅速创建ActionContext，  
+
+ValueStack，action。然后把action存放进ValueStack，所以action的实例变量可以被OGNL访问。 请求来的时候，action、ValueStack的生命开始，请求结束，action、    ValueStack的生命结束；  
+
+2）action是多例的，和Servlet不一样，Servelt是单例的；  
+
+3）每个action的都有一个对应的值栈，值栈存放的数据类型是该action的实例，以及该action中的实例变量，Action对象默认保存在栈顶；  
+
+4）ValueStack本质上就是一个ArrayList；  
+
+5）关于ContextMap，Struts 会把下面这些映射压入 ContextMap 中：  
+
+parameters  :   该 Map 中包含当前请求的请求参数  
+
+request     :   该 Map 中包含当前 request 对象中的所有属性  session :该 Map 中包含当前 session 对象中的所有属性  
+
+application :该 Map 中包含当前 application 对象中的所有属性  
+
+attr:该 Map 按如下顺序来检索某个属性: request, session, application           
+
+6）使用OGNL访问值栈的内容时，不需要#号，而访问request、session、application、attr时，需要加#号；  
+
+7）注意： Struts2中，OGNL表达式需要配合Struts标签才可以使用。如：<s:property value="name"/>  
+
+8）在struts2配置文件中引用ognl表达式 ,引用值栈的值 ，此时使用的"$"，而不是#或者%;  
+
+ActionContext、ServletContext、pageContext的区别？  
+
+1）ActionContext是当前的Action的上下文环境，通过ActionContext可以获取到request、session、ServletContext等与Action有关的对象的引用；  
+
+2）ServletContext是域对象，一个web应用中只有一个ServletContext，生命周期伴随整个web应用；  
+
+3）pageContext是JSP中的最重要的一个内置对象，可以通过pageContext获取其他域对象的应用，同时它是一个域对象，作用范围只针对当前页面，当前页面结束时，pageContext销毁，  
+
+生命周期是JSP四个域对象中最小的。  
+
+result的type属性中有哪几种结果类型？  
+
+一共10种：    
+
+dispatcher          
+
+struts默认的结果类型，把控制权转发给应用程序里的某个资源不能把控制权转发给一个外部资源，若需要把控制权重定向到一个外部资源, 应该使用  
+
+redirect结果类型  
+
+redirect    把响应重定向到另一个资源（包括一个外部资源）  
+
+redirectAction      把响应重定向到另一个 Action  
+
+freemarker、velocity、chain、httpheader、xslt、plainText、stream 
+
+拦截器的生命周期与工作过程？  
+
+1）每个拦截器都是实现了Interceptor接口的 Java 类；  
+
+2）init(): 该方法将在拦截器被创建后立即被调用, 它在拦截器的生命周期内只被调用一次. 可以在该方法中对相关资源进行必要的初始化；  
+
+3）intercept(ActionInvocation invocation): 每拦截一个动作请求, 该方法就会被调用一次；  
+
+4）destroy: 该方法将在拦截器被销毁之前被调用, 它在拦截器的生命周期内也只被调用一次；  
+
+5）struts2中有内置了18个拦截器。
+
+为什么要用struts2
+
+JSP、Servlet、JavaBean技术的出现给我们构建强大的企业应用系统提供了可能。但用这些技术构建的系统非常的繁乱，所以在此之上，我们需要一个规则、一个把这些技术组织起来的规则，这就是框架，Struts便应运而生。
+
+基于Struts开发的应用由3类组件构成：控制器组件、模型组件、视图组件
+
+struts2的validate框架是如何运作的
+
+在struts配置文件中配置具体的错误提示，再在FormBean中的validate()方法具体调用。
+
+说下struts2的设计模式
+
+MVC模式: web应用程序启动时就会加载并初始化ActionServler。用户提交表单时，一个配置好的ActionForm对象被创建，并被填入表单相应的数据，ActionServler根据Struts-config.xml文件配置好的设置决定是否需要表单验证，如果需要就调用ActionForm的 Validate（）验证后选择将请求发送到哪个Action，如果Action不存在，ActionServlet会先创建这个对象，然后调用 Action的execute（）方法。Execute（）从ActionForm对象中获取数据，完成业务逻辑，返回一个ActionForward对象，ActionServlet再把客户请求转发给ActionForward对象指定的jsp组件，ActionForward对象指定的jsp生成动态的网页，返回给客户。
+
+struts2如何完成文件的上传？  
+
+1、JSP页面：  
+
+1）JSP页面的上传文件的组件：<s: file name=”upload” />，如果需要一次上传多个文件, 就必须使用多个 file 标签, 但它们的名字必须是相同的，即：  
+
+ name=“xxx”的值必须一样；  
+
+2）必须把表单的enctype属性设置为：multipart/form-data；  
+
+ 3）表单的方法必须为post，因为post提交的数据在消息体中，而无大小限制。  
+
+2、对应的action：  
+
+ 1）在 Action 中新添加 3 个和文件上传相关的属性；  
+
+2）如果是上传单个文件, uploadImage属性的类型就是 java.io.File, 它代表被上传的文件, 第二个和第三个属性的类型是 String, 它们分别代表上传文  
+
+件的文件名和文件类型，定义方式是分别是：  
+
+jsp页面file组件的名称+ContentType,  jsp页面file组件的名称+FileName  
+
+3）如果上上传多个文件, 可以使用数组或 List 
+
+struts2学习总结
+
+1：在action中定义的变量，在jsp页面中显示用：<s:property value="变量名" />
+
+2：在页面中实现自动增加的序号用iterator的statuts的index属性 eg：
+
+<s:iterator value="#request.inOutAccountList"id="data" status="listStat">
+
+<s:property value="#listStat.index+1"/>
+
+</s:iterator>
+
+3:在action类中取得request和session对象的方法
+
+Map session = ActionContext.getContext().getSession();
+HttpServletRequest request = ServletActionContext.getRequest ();
+
+设置它们的值的方法
+
+session.put("operation", "add");
+request.setAttribute("name", name);
+
+页面中取得它们的值：
+
+<s:property value="#session.operation"/>
+<s:property value="#request.name"/>
+
+4:页面中奇偶行样式不一样的控制方法：
+
+<tr class="<s:if test='#listStat.odd == true'>tableStyle-tr1</s:if><s:else>tableStyle-tr2</s:else>">
+
+5:单选框和复选框的使用方法
+
+1):可以设置默认选中值，注意list的值的设置，通过这种方式使key和value不一样，这种方法比较常用(checkboxlist or radio)
+
+<s:radio name="uncarInsPolicy.policyStateCode"
+list="#{'5':'通过' , '2':'不通过'}"
+listKey="key"
+listValue="value"
+value='5'
+/>
+
+2):这里的key和value的值是一样的(checkboxlist or radio)
+
+<s:checkboxlist
+list="{'Red', 'Blue', 'Green'}"
+name="favoriteColor"/>
+
+6:struts2 中的标签会生成类似由<tr><td></td></tr>构成的字串（具体什么标签生成什么，可以查看生成后的页面的源代码）如果不限制这些多余代码的生成，页面将变得无法控制，所以一般我们是不希望它生成多余的代码的，具体的设置方法如果，在struts.xml中统一配置
+<constant name="struts.ui.theme" value="simple"/>加上该句即可
+也可以通过在页面中将tag的theme属性设为"simple"取消其默认的表格布局
+不过最好是：自定义一个theme，并将其设为默认应用到整个站点，如此一来就可以得到统一的站点风格
+
+7：jsp页面中格式化日期的方法
+
+<s:date name="unCarInsModificationInfo.createTime"format="yyyy-MM-dd" nice="false"/>这样就可以将日期格式化为yyyy－MM－dd的形式
+
+8：默认情况下，当请求action发生时，Struts运行时（Runtime）根据struts.xml里的Action映射集(Mapping)，实例化action对应的类，并调用其execute方法。当然，我们可以通过以下两种方法改变这种默认调用
+
+1）在classes/sturts.xml中新建Action，并指明其调用的方法
+比如想调用action类中的
+
+public String aliasAction() {
+message ="自定义Action调用方法";
+return SUCCESS;
+}
+则在classes/sturts.xml中加入下面代码：
+<action name="AliasHelloWorld"class="tutorial.HelloWorld" method="aliasAction">
+<result>/HelloWorld.jsp</result>
+</action>
+既可用action名调用该方法了
+
+2）（比较常用）
+
+访问Action时，在Action名后加上“!xxx”（xxx为方法名）。
+
+9：Struts 2.0有两个配置文件，struts.xml和struts.properties都是放在WEB-INF/classes/下。
+struts.xml用于应用程序相关的配置
+struts.properties用于Struts 2.0的运行时（Runtime）的配置
+
+10:在action类中取得web下某一文件夹物理路径（绝对路径）的方法
+filePath = ServletActionContext.getServletContext().getRealPath("/upLoadFiles")
+
+11：要想返回的页面不是一个直接JSP页面而是要先通过返回action中的方法读取相应的数据再返回到jsp页面，有两种方法
+
+1）在struts.xml中这么设置
+
+<result name="list"type="redirect-action">sysmanage/UserBaseInfoAction!findUserBaseInfo.action</result>
+
+2）在action中返回时直接调用这个方法即可
+
+return findList（）；
+
+12：设置checkboxlist中默认值的方法
+
+<s:checkboxlist name="skills1"
+="Skills 1"
+list="{ 'Java', '.Net', 'RoR', 'PHP' }"
+value="{ 'Java', '.Net' }" />
+<s:checkboxlist name="skills2"
+label="Skills 2"
+list="#{ 1:'Java', 2: '.Net', 3: 'RoR', 4: 'PHP' }"
+listKey="key"
+listValue="value"
+value="{ 1, 2, 3 }"/>
+
+13：二级级连下拉框
+
+<s:set name="foobar"
+value="#{'Java': {'Spring', 'Hibernate', 'Struts 2'}, '.Net': {'Linq', 'ASP.NET 2.0'}, 'Database': {'Oracle', 'SQL Server', 'DB2', 'MySQL'}}"/>
+<s:doubleselect list="#foobar.keySet()"
+doubleName="technology"
+doubleList="#foobar[top]"
+label="Technology" />
+
+在Struts1.*中，要想访问request、response以及session等Servlet对象是很方便的，因为它们一直是作为形参在各个方法之间进行传递的，而在Struts2中我们就很难看到它们的芳踪了，因为我们获得表单中的值都是通过预先设置好了的get方法来得到的，那么如果有些参数我们必须通过request.getParametre或者session.getAttribute来得到，那么应该怎么做呢？按照Max的教程上的说法，可以分为两种：IoC方式和非IoC方式，如何理解这两种方式的区别呢？IoC是Spring里面的特征之一，字面意思是反转控制，说白了就是依赖注入，比方说类A依赖类B，那么就主动的给A注入一个类B的对象，下面看一下这两种方法的具体实现。
+
+1．非Ioc方式
+
+这种方式主要是利用了com.opensymphony.xwork2.ActionContext类以及org.apache.struts2.ServletActionContext类，具体的方法如下所示。
+
+获得request对象：
+
+A．HttpServletRequest request =ServletActionContext.getRequest ();
+
+B．ActionContext ct= ActionContext.getContext()
+
+   HttpServletRequest request=
+
+(HttpServletRequest)ct.get(ServletActionContext.HTTP_REQUEST);
+
+获得session对象：
+
+在Struts2中底层的session都被封装成了Map类型，我们称之为SessionMap，而平常我们所说的session则是指HttpSession对象，具体的获得方法如下所示。
+
+A．Mapsession=ActionContext.getSession();
+
+B．Mapsession=(Map)ActionContext.getContext().get(ActionContext.SESSION);
+
+得到这个SessionMap之后我们就可以对session进行读写了，如果我们想得到原始的HttpSession可以首先得到HttpServletRequest对象，然后通过request.getSession()来取得原始的HttpSession对象。一般情况下SessionMap已经可以完成所有的工作，我们不必再去碰底层的session了。
+
+2．IoC方式
+
+这种方式相对来说变化就比较少了，具体流程如下所示。
+
+获得request对象：
+
+第一步：让action实现ServletRequestAware接口
+
+第二步：在action中声明一个HttpServletRequest类型的实例变量
+
+第三步：在action中实现ServletRequestAware接口的setServletRequest方法，实现方式很简单，如下所示。
+
+        privateHttpServletRequest request;
+
+publicvoid setServletRequest(HttpServletRequestrequest) {
+
+            this.request= request;
+
+    }
+
+获得Session对象(注意，此时的session是SessionMap类型)：
+
+第一步：让action实现SessionAware接口
+
+第二步：在action中声明一个HttpServletRequest类型的实例变量
+
+第三步：在action中实现SessionAware接口的setSession方法，实现方式很简单，如下所示。
+
+ 
+
+Spring 面试题
+
+Spring框架有哪些模块？
+
+Spring框架由七个模块组成组成，这7个模块(或组件)均可以单独存在，也可以与其它一个或多个模块联合使用，如下所示：
+
+(1)Spring 核心容器——IoC容器
+
+(2) Spring AOP
+
+(3) SpringORM
+
+(4) SpringDAO
+
+(5) SpringWEB
+
+(6) Spring上下文（Context）
+
+(7) SpringMVC
+
+为什么要使用Spring框架，它有什么优点？
+
+(1) 轻量级的框架
+
+(2) 非侵入性的
+
+(3) 可以整合其它的框架，比如Struts， Hibernate等
+
+(4) 可以提供事务管理
+
+Spring框架的工作机制是什么？
+
+(1) Spring MVC将所有的请求都提交给DispatcherServlet，它会委托应用系统的其它模块负责对请求进行真正的处理工作。
+
+(2) DispatcherServlet查询一个或多个HandlerMapping，找到处理请求的Controller。
+
+(3) DispatcherServlet请请求提交到目标Controller。
+
+(4) Controller进行业务逻辑处理后，会返回一个ModelAndView。
+
+(5) Dispathcher查询一个或多个ViewResolver(视图解析器)，找到ModelAndView对象指定的视图对象。
+
+(6) 视图对象负责将结果返回给客户端。
+
+怎么使用Spring配置事务 ?
+
+    Spring同时支持编程式事务策略和声明式事务策略，大部分时候都采用声明式事务策略。
+
+声明式事务管理的配置方式，通常有以下4种：
+
+(1) 使用TransactionProxyFactoryBean为目标Bean生成事务代理的配置。此方式是最传统、配置文件最臃肿、最难以阅读的方式。
+
+(2) 采用Bean继承的事务代理配置方式，比较简洁，但依然是增量式配置。
+
+(3) 采用BeanNameAutoProxyCreator，根据Bean Name自动生成事务代理的方式。这是直接利用Spring的AOP框架配置事务代理的方式，需要对Spring的AOP框架有所理解。但这种方式避免了增量式配置，效果非常不错。
+
+(4) 采用DefaultAdvisorAutoProxyCreator，直接利用Spring的AOP框架配置事务代理的方式，效果非常不错，只是这种配置方式的可读性不如第3种方式。
+
+请你谈谈SSH整合
+
+SSH整合：
+
+(1) Struts（表示层）+ Spring（业务层）+ Hibernate（持久层）
+
+(2) Struts：
+
+Struts是一个表示层框架，主要作用是界面展示、接收请求和分发请求。
+
+在MVC框架中，Struts属于VC层次，负责界面表现，负责MVC关系的分发。
+
+View：沿用 JSP，HTTP，Form，Tag，Resourse；
+
+Controller：ActionServlet，struts-config.xml，Action。
+
+(3) Hibernate：
+
+Hibernate是一个持久层框架，它只负责与关系数据库的操作。
+
+(4) Spring：
+
+Spring是一个业务层框架，是一个整合的框架，能够很好地黏合表示层与持久层。
+
+在Spring框架中如何配置数据库驱动？
+
+使用org.springframework.jdbc.datasource.DriverManagerDataSource数据源来配置数据库驱动。
+
+示例：
+<bean id=”dataSource”> 
+    <property name=”driverClassName”> <value>org.hsqldb.jdbcDriver</value></property>
+    <property name=”url”><value>jdbc:hsqldb:db/appfuse</value></property>
+    <property name=”username”><value>sa</value></property>
+    <property name=”password”><value></value></property>
+</bean>
+
+在Spring框架中applicationContext.xml文件能不能改成其它文件名？
+
+ContextLoaderListener是一个ServletContextListener，在启动Tomcat应用服务器时，它会读取WEB-INF目录下的applicationContext.xml文件，初始化Spring配置。
+
+如果你想改变applicationContext.xml文件的名字或改变它的存储位置，可以通过在web.xml文件中定义一个<context-param>元素来解决这个问题。
+
+示例：
+<listener> 
+   <listener-class>org.springframework.web.context.ContextLoaderListener 
+
+<context-param>
+         <param-name>contextConfigLocation</param-name>
+         <param-value>/WEB-INF/xyz.xml</param-value>
+     </context-param>
+
+</listener-class>
+</listener> 
+
+如何在Web应用里配置Spring？
+
+在/WEB-INF/web.xml文件中，加入如下内容：
+
+<servlet>
+
+<servlet-name>context</servlet-name>
+
+<servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class><load-on-startup>1</load-on-startup>
+
+</servlet>
+
+在启动Web应用服务器(Tomcat)时，将加载/WEB-INF/applicationContext.xml文件中的内容。
+
+在应用程序中，可以通过如下方式获取ApplicationContext实例
+
+WebApplicationContextUtils.getWebApplicationContext
+
+Spring里如何定义Hibernate Mapping？
+
+添加hibernatemapping 文件到WEB-INF目录下的applicationContext.xml文件中。
+
+示例：
+<property name=”mappingResources”>
+    <list>
+       <value>org/appfuse/model/User.hbm.xml</value>
+    </list>
+</property>
+
+解释一下Dependency Injection(DI,依赖注入)和IoC(Inversion of Control,控制反转)?
+
+依赖注入DI是一种设计模式，通常也称作控制反转，尽管在技术上来讲，依赖注入是一个IoC的特殊实现，依赖注入是指一个对象应用另外一个对象来提供一种特殊的能力。例如，把一个数据库连接以参数的形式传到一个对象的构造函数里面而不是在那个对象内部自行创建一个连接。
+
+控制反转和依赖注入的基本思想就是把类的依赖从类内部转化到外部以减少依赖。
+
+应用控制反转，对象在被创建的时候，由一个调控系统内所有对象的外界实体，将其所依赖的对象的引用，传递给它。也可以说，依赖被注入到对象中。所以，控制反转是，关于一个对象如何获取它依赖的对象的引用，这个责任的反转。
+
+Spring中的BeanFactory与ApplicationContext的作用有哪些？
+
+(1) BeanFactory负责读取Bean配置文档，管理Bean的加载和实例化，维护Bean之间的依赖关系，负责Bean的生命周期。
+
+(2)ApplicationContext除了提供上述BeanFactory所能提供的功能之外，还提供了更完整的框架功能：
+
+a. 国际化支持
+
+b. 资源访问：Resource rs = ctx. getResource(”classpath:config.properties”);
+
+c. 事件传递：通过实现ApplicationContextAware接口
+
+(3) 常用的获取ApplicationContext的方法：
+
+FileSystemXmlApplicationContext：从文件系统或者URL指定的xml配置文件创建，参数为配置文件名或文件名数组
+
+ClassPathXmlApplicationContext：从classpath的xml配置文件创建，可以从jar包中读取配置文件。
+
+WebApplicationContextUtils：从web应用的根目录读取配置文件，需要先在web.xml中配置，可以配置监听器或者 servlet来实现
+<listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+</listener> 
+<servlet> 
+    <servlet-name>context</servlet-name>
+    <servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+</servlet> 
+    这两种方式都默认配置文件为WEB-INF/applicationContext.xml，也可使用context-param指定配置文件
+
+<context-param>
+
+<param-name>contextConfigLocation</param-name>
+
+<param-value>/WEB-INF/myApplicationContext.xml</param-value>
+
+</context-param>
+
+如何在Spring中实现国际化？
+
+在applicationContext.xml文件中配置一个bean：
+<bean id=”messageSource” class=”org.springframework.context.support.ResourceBundleMessageSource”>
+    <property name=”basename”><value>message</value></property> 
+</bean>
+    在src目录下建多个properties文件，其命名格式是message_语言_国家。
+    在页面中显示信息时，通过applictionContext.getMessage(“键名”,”参数”,”区域”)取出相关的信息。
+
+Spring中的核心类有那些，各有什么作用?
+
+BeanFactory：产生一个新的实例，可以实现单例模式。
+
+BeanWrapper：提供统一的get及set方法。
+
+ApplicationContext：提供Spring框架的实现，包括BeanFactory的所有功能。
+
+什么是AOP，AOP的作用是什么?
+
+面向切面编程(AOP)提供另外一种角度来思考程序结构，通过这种方式弥补了面向对象编程(OOP)的不足。
+
+除了类(classes)以外，AOP提供了切面。切面对关注点进行模块化，例如横切多个类型和对象的事务管理。
+
+Spring的一个关键的组件就是AOP框架，可以自由选择是否使用AOP，提供声明式企业服务，特别是为了替代EJB声明式服务。最重要的服务是声明性事务管理，这个服务建立在Spring的抽象事物管理之上。
+
+允许用户实现自定义切面，用AOP来完善OOP的使用，可以把Spring AOP看作是对Spring的一种增强。
+
+使用Spring有什么好处?
+
+(1) Spring能有效地组织你的中间层对象，无论你是否选择使用了EJB。如果你仅仅使用了Struts或其它的包含了J2EE特有APIs的 framework，你会发现Spring关注了遗留问题。
+
+(2) Spring能消除在许多工程上对Singleton的过多使用。
+
+(3) Spring能消除使用各种格式的属性定制文件的需要，在整个工程中，可通过一种一致的方法来进行配置。曾经感到迷惑，一个特定类要查找迷幻般的属性关键字或系统属性,为此不得不读Javadoc乃至源编码吗？有了Spring，你可很简单地看到类的JavaBean属性。
+
+(4) Spring能通过接口而不是类促进好的编程习惯，减少编程代价到几乎为零。
+
+(5) Spring被设计为让使用它创建的应用尽可能少的依赖于它的APIs。在Spring应用中的大多数业务对象没有依赖于Spring。
+
+(6) 使用Spring构建的应用程序易于单元测试。
+
+(7) Spring能使EJB的使用成为一个实现选择，而不是应用架构的必然选择。你能选择用POJOs或local EJBs来实现业务接口，却不会影响调用代码。
+
+(8) Spring帮助你解决许多问题而无需使用EJB。Spring能提供一种EJB的替换物，它们适于许多web应用。例如,Spring能使用AOP提供声明性事务而不通过使用EJB容器，如果你仅仅需要与单个的数据库打交道，甚至不需要JTA实现。
+
+(9) Spring为数据存取提供了一致的框架，不论是使用JDBC或O/Rmapping产品（如Hibernate）。
+
+什么是Spring，它有什么特点?
+
+Spring是一个轻量级的控制反转(IoC)和面向切面(AOP)的容器框架。
+
+(1) 轻量——从大小与开销两方面而言Spring都是轻量的。完整的Spring框架可以在一个大小只有1MB多的JAR文件里发布，并且Spring所需的处理开销也是微不足道的。此外，Spring是非侵入式的：典型地，Spring应用中的对象不依赖于Spring的特定类。
+
+(2) 控制反转——Spring通过一种称作控制反转（IoC）的技术促进了松耦合。当应用了IoC，一个对象依赖的其它对象会通过被动的方式传递进来，而不是这个对象自己创建或者查找依赖对象。你可以认为IoC与JNDI相反——不是对象从容器中查找依赖，而是容器在对象初始化时不等对象请求就主动将依赖传递给它。
+
+(3) 面向切面——Spring提供了面向切面编程的丰富支持，允许通过分离应用的业务逻辑与系统级服务（例如审计（auditing）和事务管理）进行内聚性的开发。应用对象只实现它们应该做的——完成业务逻辑——仅此而已。它们并不负责其它的系统级关注点，例如日志或事务支持。
+
+(4) 容器——Spring包含并管理应用对象的配置和生命周期，在这个意义上它是一种容器，你可以配置你的每个bean如何被创建——基于一个可配置原型（prototype），你的bean可以创建一个单独的实例或者每次需要时都生成一个新的实例——以及它们是如何相互关联的。然而，Spring不应该被混同于传统的重量级的EJB容器，它们经常是庞大与笨重的，难以使用。
+
+(5) 框架——Spring可以将简单的组件配置、组合成为复杂的应用。在Spring中，应用对象被声明式地组合，典型地是在一个XML文件里。 Spring也提供了很多基础功能（事务管理、持久化框架集成等等），将应用逻辑的开发留给了你。
+
+AOP里面几个重要名词概念的解释
+
+(1) 切面(Aspect)
+
+一个关注点的模块化，这个关注点可能会横切多个对象。事务管理是J2EE应用中一个关于横切关注点的很好的例子。 在Spring AOP中，切面可以使用通用类（基于模式的风格）或者在普通类中以 @Aspect 注解来实现。
+
+(2) 连接点(Joinpoint)
+
+在程序执行过程中某个特定的点，比如某方法调用的时候或者处理异常的时候。在Spring AOP中，一个连接点总是代表一个方法的执行。 通过声明一个org.aspectj.lang.JoinPoint类型的参数可以使通知（Advice）的主体部分获得连接点信息。
+
+(3) 通知(Advice)
+
+在切面的某个特定的连接点（Joinpoint）上执行的动作。通知有各种类型，其中包括“around”、“before”和“after”等通知。通知的类型将在后面部分进行讨论。许多AOP框架，包括Spring，都是以拦截器做通知模型，并维护一个以连接点为中心的拦截器链。
+
+(4) 切入点(Pointcut)
+
+匹配连接点（Joinpoint）的断言。通知和一个切入点表达式关联，并在满足这个切入点的连接点上运行（例如，当执行某个特定名称的方法时）。切入点表达式如何和连接点匹配是AOP的核心：Spring缺省使用AspectJ切入点语法。
+
+(5) 引入(Introduction)
+
+也被称为内部类型声明（inter-typedeclaration））。声明额外的方法或者某个类型的字段。 Spring允许引入新的接口（以及一个对应的实现）到任何被代理的对象。例如，你可以使用一个引入来使bean实现 IsModified 接口，以便简化缓存机制。
+
+(6) 目标对象(TargetObject)
+
+被一个或者多个切面（aspect）所通知（advise）的对象。也有人把它叫做被通知（advised） 对象。 既然Spring AOP是通过运行时代理实现的，这个对象永远是一个被代理(proxied)对象。
+
+(7) AOP代理(AOP Proxy)
+
+AOP框架创建的对象，用来实现切面契约（aspect contract）（包括通知方法执行等功能）。 在Spring中，AOP代理可以是JDK动态代理或者CGLIB代理。 注意：Spring 2.0最新引入的基于模式（schema-based）风格和@AspectJ注解风格的切面声明，对于使用这些风格的用户来说，代理的创建是透明的。
+
+(8) 织入(Weaving)
+
+把切面（aspect）连接到其它的应用程序类型或者对象上，并创建一个被通知（advised）的对象。 这些可以在编译时（例如使用AspectJ编译器），类加载时和运行时完成。 Spring和其它纯Java AOP框架一样，在运行时完成织入。
+
+ spring工作机制及为什么要用?
+
+1.spring mvc请所有的请求都提交给DispatcherServlet,它会委托应用系统的其他模块负责负责对请求进行真正的处理工作。
+2.DispatcherServlet查询一个或多个HandlerMapping,找到处理请求的Controller.
+3.DispatcherServlet请求提交到目标Controller
+4.Controller进行业务逻辑处理后，会返回一个ModelAndView
+5.Dispathcher查询一个或多个ViewResolver视图解析器,找到ModelAndView对象指定的视图对象
+6.视图对象负责渲染返回给客户端。
+
+为什么用Spring：
+
+{AOP 让开发人员可以创建非行为性的关注点，称为横切关注点，并将它们插入到应用程序代码中。使用 AOP 后，公共服务  （比 如日志、持久性、事务等）就可以分解成方面并应用到域对象上，同时不会增加域对象的对象模型的复杂性。
+IOC 允许创建一个可以构造对象的应用环境，然后向这些对象传递它们的协作对象。正如单词 倒置 所表明的，IOC就像反 过来的 JNDI。没有使用一堆抽象工厂、服务定位器、单元素（singleton）和直接构造（straight construction），每一个对象都是用其协作对象构造的。因此是由容器管理协作对象（collaborator）。
+Spring即使一个AOP框架，也是一IOC容器。 Spring 最好的地方是它有助于您替换对象。有了 Spring，只要用 JavaBean 属性和配置文件加入依赖性（协作对象）。然后可以很容易地在需要时替换具有类似接口的协作对象。}
+
+ 
+
+ Hibernate 面试题
+
+ 
+
+比较Hibernate的三种检索策略优缺点
+
+1立即检索；
+优点：对应用程序完全透明，不管对象处于持久化状态，还是游离状态，应用程序都可以方便的从一个对象导航到与它关联的对象；
+缺点：1.select语句太多；2.可能会加载应用程序不需要访问的对象白白浪费许多内存空间；
+2延迟检索：
+优点：由应用程序决定需要加载哪些对象，可以避免可执行多余的select语句，以及避免加载应用程序不需要访问的对象。因此能提高检索性能，并且能节省内存空间；
+缺点：应用程序如果希望访问游离状态代理类实例，必须保证他在持久化状态时已经被初始化；
+3 迫切左外连接检索
+优点：1对应用程序完全透明，不管对象处于持久化状态，还是游离状态，应用程序都可以方便地冲一个对象导航到与它关联的对象。2使用了外连接，select语句数目少；
+缺点：1 可能会加载应用程序不需要访问的对象，白白浪费许多内存空间；2复杂的数据库表连接也会影响检索性能；
+
+如何在控制台看到hibernate生成并执行的sql
+
+在定义数据库和数据库属性的文件applicationConfig.xml里面，把hibernate.show_sql 设置为true
+这样生成的SQL就会在控制台出现了
+注意：这样做会加重系统的负担，不利于性能调优
+
+hibernate都支持哪些缓存策略
+
+Read-only:  这种策略适用于那些频繁读取却不会更新的数据，这是目前为止最简单和最有效的缓存策略
+* Read/write:这种策略适用于需要被更新的数据，比read-only更耗费资源，在非JTA环境下，每个事务需要在session.close和session.disconnect()被调用
+* Nonstrict read/write: 这种策略不保障两个同时进行的事务会修改同一块数据，这种策略适用于那些经常读取但是极少更新的数据
+* Transactional: 这种策略是完全事务化得缓存策略，可以用在JTA环境下
+
+hibernate里面的sorted collection 和ordered collection有什么区别
+
+sorted collection是在内存中通过java比较器进行排序的
+ordered collection是在数据库中通过order by进行排序的
+
+Hibernate工作原理及为什么要用？
+
+原理：
+1.读取并解析配置文件
+2.读取并解析映射信息，创建SessionFactory
+3.打开Sesssion
+4.创建事务Transation
+5.持久化操作
+6.提交事务
+7.关闭Session
+8.关闭SesstionFactory
+
+为什么要用：
+1.    对JDBC访问数据库的代码做了封装，大大简化了数据访问层繁琐的重复性代码。
+
+2.   Hibernate是一个基于JDBC的主流持久化框架，是一个优秀的ORM实现。他很大程度的简化DAO层的编码工作
+
+3.   hibernate使用Java反射机制，而不是字节码增强程序来实现透明性。
+
+4.   hibernate的性能非常好，因为它是个轻量级框架。映射的灵活性很出色。它支持各种关系数据库，从一对一到多对多的各种复杂关系。
+
+Hibernate是如何延迟加载?
+
+1.  Hibernate2延迟加载实现：a)实体对象 b)集合（Collection）
+
+2. Hibernate3 提供了属性的延迟加载功能
+
+当Hibernate在查询数据的时候，数据并没有存在与内存中，当程序真正对数据的操作时，对象才存在与内存中，就实现了延迟加载，他节省了服务器的内存开销，从而提高了服务器的性能。
+
+Hibernate中怎样实现类之间的关系?(如：一对多、多对多的关系)
+
+类与类之间的关系主要体现在表与表之间的关系进行操作，它们都是对对象进行操作，我们程序中把所有的表与类都映射在一起，它们通过配置文件中的many-to-one、one-to-many、many-to-many、
+
+说下Hibernate的缓存机制
+
+1. 内部缓存存在Hibernate中又叫一级缓存，属于应用事物级缓存
+
+2. 二级缓存：
+a) 应用及缓存
+b) 分布式缓存
+条件：数据不会被第三方修改、数据大小在可接受范围、数据更新频率低、同一数据被系统频繁使用、非关键数据
+c) 第三方缓存的实现
+
+Hibernate的查询方式
+
+Sql、Criteria,objectcomposition
+Hql：
+1、 属性查询
+2、 参数查询、命名参数查询
+3、 关联查询
+4、 分页查询
+5、 统计函数
+
+如何优化Hibernate？
+
+1.使用双向一对多关联，不使用单向一对多
+2.灵活使用单向一对多关联
+3.不用一对一，用多对一取代
+4.配置对象缓存，不使用集合缓存
+5.一对多集合使用Bag,多对多集合使用Set
+6. 继承类使用显式多态
+7. 表字段要少，表关联不要怕多，有二级缓存撑腰
+
+Hibernate有哪几种查询数据的方式
+
+3种：hql、条件查询QBC(QueryBy Criteria)、原生sql （通过createSQLQuery建立）
+
+谈谈Hibernate中inverse的作用
+
+inverse属性默认是false,就是说关系的两端都来维护关系。
+比如Student和Teacher是多对多关系，用一个中间表TeacherStudent维护。Gp)i
+如果Student这边inverse=”true”, 那么关系由另一端Teacher维护，就是说当插入Student时，不会操作TeacherStudent表（中间表）。只有Teacher插入或删除时才会触发对中间表的操作。所以两边都inverse=”true”是不对的，会导致任何操作都不触发对中间表的影响；当两边都inverse=”false” 或默认时，会导致在中间表中插入两次关系。
+
+说说Hibernate中的update()和saveOrUpdate()的区别，session的load()和get()的区别。
+
+saveOrUpdate()方法可以实现update()的功能，但会多些步骤，具体如下：
+如果对象在该session中已经被持久化，不进行操作；对象的标识符属性(identifier property)在数据库中不存在或者是个暂时的值，调用save()方法保存它；如果session中的另一个对象有相同的标识符抛出一个异常；以上皆不符合则调用update()更新之。
+Session.load/get方法均可以根据指定的实体类和id从数据库读取记录，并返回与之对应的实体对象。session的get()和load()其区别在于：
+如果未能发现符合条件的记录，get方法返回null，而load方法会抛出一个ObjectNotFoundException；load方法可返回实体的代理类实例，而get方法永远直接返回实体类；load方法可以充分利用内部缓存和二级缓存中的现有数据，而get方法则仅仅在内部缓存中进行数据查找，如没有发现对应数据，将越过二级缓存，直接调用SQL完成数据读取。
+
+hibernate中对象的三种状态
+
+瞬时态(Transient)、持久态(Persistent)、脱管态(Detached)。处于持久态的对象也称为PO(Persistence Object)，瞬时对象和脱管对象也称为VO（Value Object）。
+
+瞬时态
+
+由new命令开辟内存空间的java对象，
+
+eg. Person person =new Person(”amigo”, “女”);
+
+如果没有变量对该对象进行引用，它将被java虚拟机回收。
+
+瞬时对象在内存孤立存在，它是携带信息的载体，不和数据库的数据有任何关联关系，在Hibernate中，可通过session的save()或 saveOrUpdate()方法将瞬时对象与数据库相关联，并将数据对应的插入数据库中，此时该瞬时对象转变成持久化对象。
+
+持久态
+
+处于该状态的对象在数据库中具有对应的记录，并拥有一个持久化标识。如果是用hibernate的delete()方法，对应的持久对象就变成瞬时对象，因数据库中的对应数据已被删除，该对象不再与数据库的记录关联。
+
+当一个session执行close()或clear()、evict()之后，持久对象变成脱管对象，此时持久对象会变成脱管对象，此时该对象虽然具有数据库识别值，但它已不在HIbernate持久层的管理之下。
+
+持久对象具有如下特点：
+
+1. 和session实例关联；n
+
+2. 在数据库中有与之关联的记录。
+
+脱管态
+
+当与某持久对象关联的session被关闭后，该持久对象转变为脱管对象。当脱管对象被重新关联到session上时，并再次转变成持久对象。
+
+脱管对象拥有数据库的识别值，可通过update()、saveOrUpdate()等方法，转变成持久对象。
+
+脱管对象具有如下特点：
+
+1. 本质上与瞬时对象相同，在没有任何变量引用它时，JVM会在适当的时候将它回收；
+
+2.   比瞬时对象多了一个数据库记录标识值。4RESA3ES  B
+
+Detached Object（游离对象）有什么好处
+
+Detached Object（游离对象）可以传递到任何层直到表现层而不是用任何DTO(DataTransfer Objects). 然后你还可以重新把游离对象赋给另外一个Session.
+
+JDBC hibernate 和 ibatis 的区别
+
+jdbc:手动
+  手动写sql
+  delete、insert、update要将对象的值一个一个取出传到sql中,不能直接传入一个对象。
+  select:返回的是一个resultset，要从ResultSet中一行一行、一个字段一个字段的取出，然后封装到一个对象中，不直接返回一个对象。
+ ibatis的特点:半自动化
+  sql要手动写
+  delete、insert、update:直接传入一个对象
+  select:直接返回一个对象   
+ hibernate:全自动
+  不写sql,自动封装
+  delete、insert、update:直接传入一个对象
+  select:直接返回一个对象
+
+hibernate如何实现数据表映射的继承关系
+
+1、两个表，子类重复父类的属性。
+ 2、一个表，子类父类共用一个表
+    <class name=”Users” table=”users”discriminator-value=”Users”>
+   <discriminator column=”DISCRIMINATOR_USERTYPE” type=”string”/>
+<subclass name=”admin”discriminator-value=”admin”>
+           <property name=”adminRemark” column=”admin_remark” type=”string” />
+        </subclass>
+    </class>
+ 3、两个表，子类引用父类的主键，享用公共的字段或属性。
+    <class name=”Users” table=”users”>
+        <id name=”userid” column=”USERID” type=”string”>
+           <generator class=”assigned”/>
+        </id>
+        <property name=”pwd” column=”pwd” type=”string” />
+   <joined-subclass name=”Guest” table=”guest”>
+    <key column=”USERID”/>
+         <property name=”guestRemark” column=”guest_remark” type=”string” />
+        </joined-subclass>
+</class>
+批量删除
+ Query query=session.createQuery(”update”或”delete”);
+ query.executeUpdate();
+
+hibernate中Query对象的使用
+
+1 个或多个属性查询:
+ Query query=session.createQuery(”selectcustomername,customerid from Customer”)
+ List l=query.list();
+ For(int i=0;i<l.size();i++)
+{
+ Obejct[] object=(Object[])l.get(i);
+ Object[0]  object[1]
+}
+}
+分组: “selectcount(*),productname from Product group by productname order by productname”
+取值与属性一样
+配置的查询,在*.hbm.xml中
+ <query name=”sql”>
+    <![CDATA[
+     from Product where productid=:productid
+    ]]>
+</query>
+ Query query=session.getNamedQuery(sql);
+联接1
+ ”from Customer as customer join fetchcustomer.buySet”：将多的放到buySet属性中，得出的结是Customer有一个，Buy有多个
+联接2
+“from Customer as customer join customer.buySet”:得出的对象,customer与buy是1对1
+子查询:
+ ”from Customer as customer where (select count(*)from customer.buySet)>1″
+
+hibernate中Criteria和DetachedCriteria的作用是什么？
+
+Criteriac=session.createCriteria(Customer.class);
+ //设置条件
+ c.add(Expression.ge(“字段名”,”值对象”))
+  ge:>=
+  gt:>
+  le:<=
+  lt:<
+  eq:=
+ //排序
+  c.addOrder(Order.asc(“字段名”))
+ //分页
+  c.setFirstResult(1)//从第2行开始提取
+  c.setMaxResults(5)//返回5行
+
+ DetachedCriteria产生时不需要session
+ DetachedCriteria dc= DetachedCriteria.forClass(Customer.class)
+ Criteriac=Dc.getExecutableCriteria(session)
+
+hibernate中数据表映射关系主要有什么类型?
+
+one-to-many
+ inverse:主控方，外键的关系有谁控制
+  inverse=false 是主控方，外键是由它控制的   
+  inverse=true 是被控方，外键与它没关系
+  要想实现主控方的控制必须将被控方作为主控方的属性
+ cascade:级联
+  主表增从表增
+  主表修从表修
+  主表删从表删
+ lazy:延迟
+  lazy=false：一下将所有的内容取出，不延时(常用)
+  lazy=true：取出部分内容，其余内容动态去取
+  通过get可以取出对方的所有内容
+
+hibernate的核心是什么，他们的相互关系是什么，重要的方法是什么
+
+Configuration
+SessionFactory
+  Session如下方法
+   Save
+   load
+   Update
+   Delete
+      Query q=CreateQuery(“fromCustomer where customerName=:customerName”)
+   beginTransaction
+   close
+   Transaction
+   Commit()
+
+MyEclipse加入hibernate的全过程是什么
+
+1.Db-browers加入配置连接
+2.新建工程
+3.加入hibernate环境，指定*.hbm.xml及HibernateSessionFactory文件所在的位置
+
+面试中常出现的两个hibernate面试题及答案
+
+1.在数据库中条件查询速度很慢的时候,如何优化?
+1.建索引
+2.减少表之间的关联
+3.优化sql，尽量让sql很快定位数据，不要让sql做全表查询，应该走索引,把数据量大的表排在前面
+4.简化查询字段，没用的字段不要，已经对返回结果的控制，尽量返回少量数据
+
+2.在hibernate中进行多表查询,每个表中各取几个字段,也就是说查询出来的结果集并没有一个实体类与之对应,如何解决这个问题?
+解决方案一，按照Object[]数据取出数据，然后自己组bean
+解决方案二，对每个表的bean写构造函数，比如表一要查出field1,field2两个字段，那么有一个构造函数就是Bean(type1 filed1,type2 field2) ，然后在hql里面就可以直接生成这个bean了。具体怎么用请看相关文档，我说的不是很清楚。
+session.load()和session.get()的区别
+Session.load/get方法均可以根据指定的实体类和id从数据库读取记录，并返回与之对应的实体对象。其区别在于：
+
+如果未能发现符合条件的记录，get方法返回null，而load方法会抛出一个ObjectNotFoundException。
+Load方法可返回实体的代理类实例，而get方法永远直接返回实体类。
+load方法可以充分利用内部缓存和二级缓存中的现有数据，而get方法则仅仅在内部缓存中进行数据查找，如没有发现对应数据，将越过二级缓存，直接调用SQL完成数据读取。
+Session在加载实体对象时，将经过的过程：
+
+首先，Hibernate中维持了两级缓存。第一级缓存由Session实例维护，其中保持了Session当前所有关联实体的数据，也称为内部缓存。而第二级缓存则存在于SessionFactory层次，由当前所有由本 SessionFactory构造的Session实例共享。出于性能考虑，避免无谓的数据库访问，Session在调用数据库查询功能之前，会先在缓存中进行查询。首先在第一级缓存中，通过实体类型和id进行查找，如果第一级缓存查找命中，且数据状态合法，则直接返回。
+之后，Session会在当前“NonExists”记录中进行查找，如果“NonExists”记录中存在同样的查询条件，则返回null。 “NonExists”记录了当前Session实例在之前所有查询操作中，未能查询到有效数据的查询条件（相当于一个查询黑名单列表）。如此一来，如果 Session中一个无效的查询条件重复出现，即可迅速作出判断，从而获得最佳的性能表现。
+对于load方法而言，如果内部缓存中未发现有效数据，则查询第二级缓存，如果第二级缓存命中，则返回。
+如在缓存中未发现有效数据，则发起数据库查询操作（Select SQL），如经过查询未发现对应记录，则将此次查询的信息在“NonExists”中加以记录，并返回null。
+根据映射配置和Select SQL得到的ResultSet，创建对应的数据对象。
+将其数据对象纳入当前Session实体管理容器（一级缓存）。
+执行Interceptor.onLoad方法（如果有对应的Interceptor）。
+将数据对象纳入二级缓存。
+如果数据对象实现了LifeCycle接口，则调用数据对象的onLoad方法。
+返回数据对象。
+
+Hibernate的主键生成机制
+
+1) assigned
+主键由外部程序负责生成，无需Hibernate参与。
+2) hilo
+通过hi/lo 算法实现的主键生成机制，需要额外的数据库表保存主键生成历史状态。
+3) seqhilo
+与hilo 类似，通过hi/lo 算法实现的主键生成机制，只是主键历史状态保存在Sequence中，适用于支持Sequence的数据库，如Oracle。
+4) increment
+主键按数值顺序递增。此方式的实现机制为在当前应用实例中维持一个变量，以保存着当前的最大值，之后每次需要生成主键的时候将此值加1作为主键。这种方式可能产生的问题是：如果当前有多个实例访问同一个数据库，那么由于各个实例各自维护主键状态，不同实例可能生成同样的主键，从而造成主键重复异常。因此，如果同一数据库有多个实例访问，此方式必须避免使用。
+5) identity
+采用数据库提供的主键生成机制。如DB2、SQL Server、MySQL中的主键生成机制。
+6) sequence
+采用数据库提供的sequence 机制生成主键。如Oralce中的Sequence。
+7) native
+由Hibernate根据底层数据库自行判断采用identity、hilo、sequence其中一种作为主键生成方式。
+8) uuid.hex
+由Hibernate基于128 位唯一值产生算法生成16 进制数值（编码后以长度32 的字符串表示）作为主键。
+9) uuid.string
+与uuid.hex 类似，只是生成的主键未进行编码（长度16）。在某些数据库中可能出现问题（如PostgreSQL）。
+10) foreign
+使用外部表的字段作为主键。一般而言，利用uuid.hex方式生成主键将提供最好的性能和数据库平台适应性。
+这10中生成OID标识符的方法,increment 比较常用,把标识符生成的权力交给Hibernate处理.但是当同时多个Hibernate应用操作同一个数据库,甚至同一张表的时候.就推荐使用identity依赖底层数据库实现,但是数据库必须支持自动增长,当然针对不同的数据库选择不同的方法.如果你不能确定你使用的数据库具体支持什么的情况下.可以选择用native 让Hibernate来帮选择identity,sequence,或hilo.
+另外由于常用的数据库，如Oracle、DB2、SQLServer、MySql 等，都提供了易用的主键生成机制（Auto-Increase 字段或者Sequence）。我们可以在数据库提供的主键生成机制上，采用generator-class=native的主键生成方式。
+不过值得注意的是，一些数据库提供的主键生成机制在效率上未必最佳，大量并发insert数据时可能会引起表之间的互锁。数据库提供的主键生成机制，往往是通过在一个内部表中保存当前主键状态（如对于自增型主键而言，此内部表中就维护着当前的最大值和递增量），之后每次插入数据会读取这个最大值，然后加上递增量作为新记录的主键，之后再把这个新的最大值更新回内部表中，这样，一次Insert操作可能导致数据库内部多次表读写操作，同时伴随的还有数据的加锁解锁操作，这对性能产生了较大影响。因此，对于并发Insert要求较高的系统，推荐采用uuid.hex 作为主键生成机制
+
+hibernate面试题:怎么得到一个Collection的大小而不用初始化它
+
+Integer size = (Integer) s.createFilter( collection, "select count(*)" ).uniqueResult();
+
+hibernate面试题:怎么得到查询结果的记录数而不用返回查询结果
+
+Integer count = (Integer) session.createQuery("select count(*) from ....").uniqueResult();
+
+什么是SessionFactory,她是线程安全么？
+
+SessionFactory isHibernates concept of a single datastore and is threadsafe so that many threadscan access it concurrently and request for sessions and immutable cache ofcompiled mappings for a single database. A SessionFactory is usually only builtonce at startup. SessionFactory should be wrapped in some kind of singleton sothat it can be easily accessed in an application code.
+
+SessionFactorysessionFactory = new Configuration().configure().buildSessionfactory();
+
+SessionFactory 是Hibrenate单例数据存储和线程安全的，以至于可以多线程同时访问。一个SessionFactory 在启动的时候只能建立一次。SessionFactory应该包装各种单例以至于它能很简单的在一个应用代码中储存.
+
+如何配置Hibernate？
+
+The configurationfiles hibernate.cfg.xml (or hibernate.properties) and mapping files *.hbm.xmlare used by the Configuration class to create (i.e. configure and bootstraphibernate) the SessionFactory, which in turn creates the Session instances.Session instances are the primary interface for the persistence service.
+
+”hibernate.cfg.xml (alternatively can use hibernate.properties): These two filesare used to configure the hibernate sevice (connection driver class, connectionURL, connection username, connection password, dialect etc). If both files arepresent in the classpath then hibernate.cfg.xml file overrides the settingsfound in the hibernate.properties file.
+
+” Mapping files(*.hbm.xml): These files are used to map persistent objects to a relationaldatabase. It is the best practice to store each object in an individual mappingfile (i.e mapping file per class) because storing large number of persistentclasses into one mapping file can be difficult to manage and maintain. Thenaming convention is to use the same name as the persistent (POJO) class name.For example Account.class will have a mapping file named Account.hbm.xml.Alternatively hibernate annotations can be used as part of your persistentclass code instead of the *.hbm.xml files.
+
+优化hibernate性能的几点建议
+
+1、针对oracle数据库而言，Fetch Size 是设定JDBC的Statement读取数据的时候每次从数据库中取出的记录条数，一般设置为30、50、100。Oracle数据库的JDBC驱动默认的FetchSize=15，设置Fetch Size设置为：30、50，性能会有明显提升，如果继续增大，超出100，性能提升不明显，反而会消耗内存。
+
+即在hibernate配制文件中进行配制：
+
+1 ＜property name=”hibernateProperties”＞
+2 ＜props＞
+3 ＜prop key=”hibernate.dialect”＞org.hibernate.dialect.Oracle9Dialect＜/prop＞
+4 ＜prop key=”hibernate.show_sql”＞false＜/prop＞
+5 ＜!– Create/update thedatabase tables automatically when the JVM starts up
+6 ＜prop key=”hibernate.hbm2ddl.auto”＞update＜/prop＞ –＞
+7 ＜!– Turn batching off forbetter error messages under PostgreSQL
+8 ＜prop key=”hibernate.jdbc.batch_size”＞100＜/prop＞ –＞
+9 ＜prop key=”hibernate.jdbc.batch_size”＞50＜/prop＞
+10 ＜/props＞
+11 ＜/property＞Fetch Size设的越大，读数据库的次数越少，速度越快；Fetch Size越小，读数据库的次数越多，速度越慢。
+2、如果是超大的系统，建议生成htm文件。加快页面提升速度。
+
+3、不要把所有的责任推在hibernate上，对代码进行重构，减少对数据库的操作，尽量避免在数据库查询时使用in操作，以及避免递归查询操作，代码质量、系统设计的合理性决定系统性能的高低。
+
+4、 对大数据量查询时，慎用list()或者iterator()返回查询结果，
+
+（1）. 使用List()返回结果时，Hibernate会所有查询结果初始化为持久化对象，结果集较大时，会占用很多的处理时间。
+
+（2）. 而使用iterator()返回结果时，在每次调用iterator.next()返回对象并使用对象时，Hibernate才调用查询将对应的对象初始化，对于大数据量时，每调用一次查询都会花费较多的时间。当结果集较大，但是含有较大量相同的数据，或者结果集不是全部都会使用时，使用iterator()才有优势。
+
+5、在一对多、多对一的关系中，使用延迟加载机制，会使不少的对象在使用时方会初始化，这样可使得节省内存空间以及减少数据库的负荷，而且若PO中的集合没有被使用时，就可减少互数据库的交互从而减少处理时间。
+
+6、对含有关联的PO（持久化对象）时，若default-cascade=”all”或者 “save-update”，新增PO时，请注意对PO中的集合的赋值操作，因为有可能使得多执行一次update操作。
+
+7、 对于大数据量新增、修改、删除操作或者是对大数据量的查询，与数据库的交互次数是决定处理时间的最重要因素，减少交互的次数是提升效率的最好途径，所以在开发过程中，请将show_sql设置为true，深入了解Hibernate的处理过程，尝试不同的方式，可以使得效率提升。尽可能对每个页面的显示，对数据库的操作减少到100—-150条以内。越少越好。
+
+如何进行hibernate性能调优
+
+大体上，对于HIBERNATE性能调优的主要考虑点如下:
+Ø 数据库设计调整
+Ø HQL优化
+Ø API的正确使用(如根据不同的业务类型选用不同的集合及查询API)
+Ø 主配置参数(日志，查询缓存，fetch_size,batch_size等)
+Ø 映射文件优化(ID生成策略，二级缓存，延迟加载，关联优化)
+Ø 一级缓存的管理
+Ø 针对二级缓存，还有许多特有的策略
+Ø 事务控制策略。
+1、 数据库设计
+a) 降低关联的复杂性
+b) 尽量不使用联合主键
+c) ID的生成机制，不同的数据库所提供的机制并不完全一样
+d) 适当的冗余数据，不过分追求高范式
+2、 HQL优化
+HQL如果抛开它同HIBERNATE本身一些缓存机制的关联，HQL的优化技巧同普通的SQL优化技巧一样，可以很容易在网上找到一些经验之谈。
+3、 主配置
+a) 查询缓存，同下面讲的缓存不太一样，它是针对HQL语句的缓存，即完全一样的语句再次执行时可以利用缓存数据。但是，查询缓存在一个交易系统(数据变更频繁，查询条件相同的机率并不大)中可能会起反作用:它会白白耗费大量的系统资源但却难以派上用场。
+b) fetch_size，同JDBC的相关参数作用类似，参数并不是越大越好，而应根据业务特征去设置
+c) batch_size同上。
+d) 生产系统中，切记要关掉SQL语句打印。
+4、 缓存
+a) 数据库级缓存:这级缓存是最高效和安全的，但不同的数据库可管理的层次并不一样，比如，在ORACLE中，可以在建表时指定将整个表置于缓存当中。
+b) SESSION缓存:在一个HIBERNATESESSION有效，这级缓存的可干预性不强，大多于HIBERNATE自动管理，但它提供清除缓存的方法，这在大批量增加/更新操作是有效的。比如，同时增加十万条记录，按常规方式进行，很可能会发现OutofMemeroy的异常，这时可能需要手动清除这一级缓存:Session.evict以及Session.clear
+c) 应用缓存:在一个SESSIONFACTORY中有效，因此也是优化的重中之重，因此，各类策略也考虑的较多，在将数据放入这一级缓存之前，需要考虑一些前提条件:
+i. 数据不会被第三方修改(比如，是否有另一个应用也在修改这些数据?)
+ii. 数据不会太大
+iii. 数据不会频繁更新(否则使用CACHE可能适得其反)
+iv. 数据会被频繁查询
+v. 数据不是关键数据(如涉及钱，安全等方面的问题)。
+缓存有几种形式，可以在映射文件中配置:read-only(只读，适用于很少变更的静态数据/历史数据)，nonstrict-read-write，read-write(比较普遍的形式，效率一般)，transactional(JTA中，且支持的缓存产品较少)
+d) 分布式缓存:同c)的配置一样，只是缓存产品的选用不同，在目前的HIBERNATE中可供选择的不多，oscache, jboss cache，目前的大多数项目，对它们的用于集群的使用(特别是关键交易系统)都持保守态度。在集群环境中，只利用数据库级的缓存是最安全的。
+5、 延迟加载
+a) 实体延迟加载:通过使用动态代理实现
+b) 集合延迟加载:通过实现自有的SET/LIST，HIBERNATE提供了这方面的支持
+c) 属性延迟加载:
+6、 方法选用
+a) 完成同样一件事，HIBERNATE提供了可供选择的一些方式，但具体使用什么方式，可能用性能/代码都会有影响。显示，一次返回十万条记录(List/Set/Bag/Map等)进行处理，很可能导致内存不够的问题，而如果用基于游标(ScrollableResults)或Iterator的结果集，则不存在这样的问题。
+b) Session的load/get方法，前者会使用二级缓存，而后者则不使用。
+c) Query和list/iterator，如果去仔细研究一下它们，你可能会发现很多有意思的情况，二者主要区别(如果使用了Spring，在HibernateTemplate中对应find,iterator方法):
+i. list只能利用查询缓存(但在交易系统中查询缓存作用不大)，无法利用二级缓存中的单个实体，但list查出的对象会写入二级缓存，但它一般只生成较少的执行SQL语句，很多情况就是一条(无关联)。
+ii. iterator则可以利用二级缓存，对于一条查询语句，它会先从数据库中找出所有符合条件的记录的ID，再通过ID去缓存找，对于缓存中没有的记录，再构造语句从数据库中查出，因此很容易知道，如果缓存中没有任何符合条件的记录，使用iterator会产生N+1条SQL语句(N为符合条件的记录数)
+iii. 通过iterator，配合缓存管理API，在海量数据查询中可以很好的解决内存问题，如:
+while(it.hasNext()){
+YouObject object = (YouObject)it.next();
+session.evict(youObject);
+sessionFactory.evice(YouObject.class, youObject.getId());
+}
+如果用list方法，很可能就出OutofMemory错误了。
+iv. 通过上面的说明，我想你应该知道如何去使用这两个方法了。
+7、 集合的选用
+在HIBERNATE 3.1文档的“19.5.Understanding Collection performance”中有详细的说明。
+8、 事务控制
+事务方面对性能有影响的主要包括:事务方式的选用，事务隔离级别以及锁的选用
+a) 事务方式选用:如果不涉及多个事务管理器事务的话，不需要使用JTA，只有JDBC的事务控制就可以。
+b) 事务隔离级别:参见标准的SQL事务隔离级别
+c) 锁的选用:悲观锁(一般由具体的事务管理器实现)，对于长事务效率低，但安全。乐观锁(一般在应用级别实现)，如在HIBERNATE中可以定义VERSION字段，显然，如果有多个应用操作数据，且这些应用不是用同一种乐观锁机制，则乐观锁会失效。因此，针对不同的数据应有不同的策略，同前面许多情况一样，很多时候我们是在效率与安全/准确性上找一个平衡点，无论如何，优化都不是一个纯技术的问题，你应该对你的应用和业务特征有足够的了解。
+9、 批量操作
+即使是使用JDBC，在进行大批数据更新时，BATCH与不使用BATCH有效率上也有很大的差别。我们可以通过设置batch_size来让其支持批量操作。
+举个例子，要批量删除某表中的对象，如“delete Account”，打出来的语句，会发现HIBERNATE找出了所有ACCOUNT的ID，再进行删除，这主要是为了维护二级缓存，这样效率肯定高不了，在后续的版本中增加了bulkdelete/update，但这也无法解决缓存的维护问题。也就是说，由于有了二级缓存的维护问题，HIBERNATE的批量操作效率并不尽如人意!
+从前面许多要点可以看出，很多时候我们是在效率与安全/准确性上找一个平衡点，无论如何，优化都不是一个纯技术的问题，你应该对你的应用和业务特征有足够的了解，一般的，优化方案应在架构设计期就基本确定，否则可能导致没必要的返工，致使项目延期，而作为架构师和项目经理，还要面对开发人员可能的抱怨，必竟，我们对用户需求更改的控制力不大，但技术/架构风险是应该在初期意识到并制定好相关的对策。
+还有一点要注意，应用层的缓存只是锦上添花，永远不要把它当救命稻草，应用的根基(数据库设计，算法，高效的操作语句，恰当API的选择等)才是最重要的。
+
+JDBC ,hibernate分页显示怎么实现？
+
+答：方法分别为：
+1) Hibernate 的分页：
+Query query = session.createQuery(”from Student”);
+query.setFirstResult(firstResult);//设置每页开始的记录号
+query.setMaxResults(resultNumber);//设置每页显示的记录数
+Collection students = query.list();
+2) JDBC 的分页：根据不同的数据库采用不同的sql 分页语句
+例如: Oracle 中的sql 语句为: “SELECT * FROM (SELECT a.*, rownum r FROM
+TB_STUDENT) WHERE r between 2 and 10″ 查询从记录号2 到记录号10 之间的
+所有记录。
+
+Hibernate的应用(hibernate的结构)
+
+答：//首先获得SessionFactory 的对象
+SessionFactory sessionFactory = new Configuration().configure().
+buildSessionFactory();
+//然后获得session 的对象
+Session session = sessionFactory.openSession();
+//其次获得Transaction 的对象
+Transaction tx = session.beginTransaction();
+//执行相关的数据库操作:增,删,改,查
+session.save(user); //增加, user 是User 类的对象
+session.delete(user); //删除
+session.update(user); //更新
+Query query = session.createQuery(“from User”); //查询
+List list = query.list();
+//提交事务
+tx.commit();
+//如果有异常,我们还要作事务的回滚,恢复到操作之前
+tx.rollback();
+//最后还要关闭session,释放资源
+session.close();
+
+关于hibernate的几个面试题
+
+1）在hibernate 中，在配置文件呈标题一对多，多对多的标签是什么；
+2）Hibernate 的二级缓存是什么；
+3）Hibernate 是如何处理事务的；
+答：1）一对多的标签为<one-to-many> ；多对多的标签为<many-to-many>；
+2）sessionFactory 的缓存为hibernate 的二级缓存；
+3）Hibernate 的事务实际上是底层的JDBCTransaction 的封装或者是JTA
+Transaction 的封装；默认情况下使用JDBCTransaction
+
+Hibernate的五个核心接口
+
+Configuration 接口：配置Hibernate，根据其启动hibernate，创建
+SessionFactory 对象；
+SessionFactory 接口：初始化Hibernate，充当数据存储源的代理，创建
+session 对象，sessionFactory 是线程安全的，意味着它的同一个实例可以被应
+用的多个线程共享，是重量级、二级缓存；
+Session 接口：负责保存、更新、删除、加载和查询对象，是线程不安全的，
+避免多个线程共享同一个session，是轻量级、一级缓存；
+Transaction 接口：管理事务；
+Query 和Criteria 接口：执行数据库的查询。
+
+如何优化hibernate
+
+1. 使用双向一对多关联，不使用单向一对多
+2. 灵活使用单向一对多关联
+3. 不用一对一，用多对一取代
+4. 配置对象缓存，不使用集合缓存
+5. 一对多集合使用Bag,多对多集合使用Set
+6. 继承类使用显式多态
+7. 表字段要少，表关联不要怕多，有二级缓存撑腰
+
+说下hibernate的缓存机制
+
+1. 内部缓存存在Hibernate中又叫一级缓存，属于应用事物级缓存
+2. 二级缓存：
+a) 应用及缓存
+b) 分布式缓存
+条件：数据不会被第三方修改、数据大小在可接受范围、数据更新频率低、同一数据被系统频繁使用、非关键数据
+c) 第三方缓存的实现
+
+hibernate怎么实现类之间的关系
+
+类与类之间的关系主要体现在表与表之间的关系进行操作，它们都是对对象进行操作，我们程序中把所有的表与类都映射在一起，它们通过配置文件中的many-to-one、one-to-many、many-to-many、
+
+hibernate如何实现延迟加载
+
+1. Hibernate2延迟加载实现：a)实体对象 b)集合（Collection）
+2. Hibernate3 提供了属性的延迟加载功能
+当Hibernate在查询数据的时候，数据并没有存在与内存中，当程序真正对数据的操作时，对象才存在与内存中，就实现了延迟加载，他节省了服务器的内存开销，从而提高了服务器的性能。
+
+Hibernate数据查询的几种方式
+
+1.使用主键id加载对象(load(),get());
+
+2.通过对象导航,比如通过stu.getTeam()得到team的实例;
+
+3 使用hql;
+
+4使用qbc(query by criteria)
+
+5直接使用sql语句取得记录集;
+
+一般都使用后面三种方式.
+
+注意.hql是面向对象的查询.语法和sql是基本一样的.不区分大小写的,但是注意的是对与对象.必须遵循对象的大小写.因为hql是对像查询..同时我们必须清楚.hql只能取得对象,而不支持uid(update,insert.delete)
+
+Hibernate中：不看数据库，不看XML文件，不看查询语句，怎么能知道表的结构
+
+看表结构对应的类文件，比如UserInfo表对应的UserInfo.java文件
+
+
+
+S2SH部分
+
+请你谈谈SSH整合
+
+SSH：
+Struts（表示层）+Spring（业务层）+Hibernate（持久层）
+Struts：
+Struts是一个表示层框架，主要作用是界面展示，接收请求，分发请求。
+在MVC框架中，Struts属于VC层次，负责界面表现，负责MVC关系的分发。（View：沿用JSP，HTTP，Form，Tag，Resourse ；Controller：ActionServlet，struts-config.xml，Action）
+Hibernate：
+Hibernate是一个持久层框架，它只负责与关系数据库的操作。
+Spring：
+Spring是一个业务层框架，是一个整合的框架，能够很好地黏合表示层与持久层。
+
+
+
+综合面试题
+
+1、 简述你对IoC（Inversion of Control）的理解，描述一下Spring中实现DI（Dependency Injection）的几种方式。
+
+spring的IOC有三种注入方式  第一是根据属性注入  也叫set方法注入；第二种是根据构造方法进行注入；第三种是根据注解进行注入，这种方式我认为比较好，方便，要是bean多的话，使用前两种方式会使得配置文件过于臃肿。
+
+2、 Spring的Bean有多种作用域，包括：
+singleton、prototype、request、session、globalsession、application、自定义
+
+3、 简单描述Spring Framework与Struts的不同之处，整合Spring与Struts有哪些方法，哪种最好，为什么？
+
+答、 Spring是完整的一站式框架，而Struts仅是MVC框架，且着重于MVC中的C。Spring有三种方式整合Struts：使用 Spring 的 ActionSupport 类整合 Struts；使用 Spring 的DelegatingRequestProcessor 覆盖 Struts 的 RequestProcessor；将 Struts Action 管理委托给 Spring 框架，动作委托最好。（详见使用Spring 更好地处理Struts 动作）
+
+Spring 2.0新增一种方式：AutowiringRequestProcessor。（详见http://www.javaeye.com/topic/24239）
+
+4、 Hibernate中的update()和saveOrUpdate()的区别
+
+答、saveOrUpdate()方法可以实现update()的功能，但会多些步骤，具体如下：
+
+如果对象在该session中已经被持久化，不进行操作；
+
+对象的标识符属性(identifierproperty)在数据库中不存在或者是个暂时的值，调用save()方法保存它；
+
+如果session中的另一个对象有相同的标识符抛出一个异常；
+
+以上皆不符合则调用update()更新之。
+
+5、 Spring对多种ORM框架提供了很好的支持，简单描述在Spring中使用Hibernate的方法，并结合事务管理。
+
+答、 在context中定义DataSource，创建SessionFactoy，设置参数；DAO类继承HibernateDaoSupport，实现具体接口，从中获得HibernateTemplate进行具体操作。
+
+在使用中如果遇到OpenSessionInView的问题，可以添加OpenSessionInViewFilter或OpenSessionInViewInterceptor。（详见Spring framework 2.0 Reference的12.2节Hibernate）
+
+声明式事务需声明事务管理器，在context中设置指定属性，用确定和。

@@ -1,0 +1,14 @@
+可以不用Windows系统安装盘，不用安装矮人DOS工具箱也可以很简单地实现卸载Linux.双系统卸载Linux的主要问题是当在windows中将linux 分区直接格式化之后，Grub系统引导程序也会被同时删除，所以导致重启后无法进入Windows 或Linux任何一个系统。
+　　因此我们在卸载linux之前，先修复MBR,然后再删除Linux分区就可以了。而MbrFix.exe 就是这样一个Windows 修复MBR的应用程序软件，MbrFix.exe 不仅支持Windows XP,还支持32位或64位的Windows NT, Windows 2000,Windows Server 2003, Windows Vista, Windows Server 2008, Windows 7 和 Windows PE系统。
+　　以下是系统之家使用MbrFix.exe卸载Linux的步骤：
+　　第一步、下载MbrFix.exe
+　　首先进入Windows 操作系统，进入网站下载  MbrFix.exe    ;
+　　下载完成后解压zip压缩包，将MbrFix.exe 剪切到C盘（系统盘）；
+　　（如果是64位的系统，请用MbrFix64.exe）
+以管理员身份运行
+　　开始–>运行–>cmd–cd \命令进入C盘符–>运行命令：  MbrFix /drive 0 fixmbr /yes –>Enter回车；
+　　（如果是Vista系统，运行命令：  MbrFix /drive 0 fixmbr /vista /yes –>Enter回车）
+　　（如果是Win7系统，运行命令：  MbrFix /drive 0 fixmbr /win7 /yes –>Enter回车）
+这样MBR修复就完成了，没有任何提示（没有消息就是最好的消息）。接下来直接删除linux分区就可以了。
+　　第二步、格式化删除 Linux分区
+　　以Win7系统为例：点击"计算机"右键–>管理–>磁盘管理–>看到几个没有盘符名称的分区（看准哦，不要将Windows 分区给误删了。）–>右键–>删除逻辑分区。

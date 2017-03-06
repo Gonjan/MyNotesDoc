@@ -1,0 +1,14 @@
+Ubuntu 下Eclipse没有菜单的解决办法
+
+其实就是缺一个环境变量UBUNTU_MENUPROXY. 在/etc/profile 里面新建这个变量并且把值写成0， 然后重启就行啦。很简单。 
+
+export UBUNTU_MENUPROXY=0
+
+
+创建脚本eclipse.sh
+export UBUNTU_MENUPROXY=0
+/usr/local/eclipse/eclipse      //就事eclipse的路径
+
+执行这个脚本 ： sh ./eclipse.sh   
+  
+  ok 了。

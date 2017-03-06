@@ -1,0 +1,12 @@
+
+
+
+
+			<dependency>
+				<groupId>jstl</groupId>
+				<artifactId>jstl</artifactId>
+				<version>1.2</version>
+			</dependency>
+
+
+mvn install:install-file -Dfile=G:\javacode\Mylib\Spring-core-4.1.6\jstl-1.2.jar -DgroupId=jstl -DartifactId=jstl -Dversion=1.2 -Dpackaging=jar

@@ -1,0 +1,133 @@
+
+向服务器请求User发布的Moment列表，每个Moment包括发布者User和前3条Comment，类似微信朋友圈动态列表
+请求格式说明：
+{
+    "[]": {              //请求一个array
+        "page": 0,       //array条件
+        "count": 2,        
+        "User": {        //请求查询名为User的table，返回名为User的JSONObject
+            "sex": 0     //object条件
+        },
+        "Moment": {
+            "userId@": “/User/id”   //缺省依赖路径，从同级object的路径开始
+        },
+        "Comment[]": {   //请求一个名为Comment的array 
+            "page": 0,
+            "count": 2,
+            "Comment": {
+                 "momentId@": “[]/Moment/id”  //完整依赖路径
+             }
+        }
+    }
+}
+
+
+
+请求格式：
+在请求体内已经向服务器端明确的说明了需要返回什么样格式的数据。
+User发布的Moment列表，每个Moment包括发布者User和前3条Comment
+
+http://localhost:8080/get/
+{"User":
+	{"id":1}, 
+	"[]":
+		{"page":0, 
+		"count":3, 
+		"Moment":
+			{"userId":1}, 
+		"[]":{"count":3, 
+			"Comment":
+				{"momentId@":"[]/Moment/id"}
+			}
+		}
+}
+
+
+
+
+以下是根据以上请求的数据，服务端返回的数据格式：
+
+
+{"User":
+	{"id":38710,"sex":0,"name":"Lemon","certified":true,"phone":13000038710,"head":"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000",
+	"date":1485948110000,"friendIdList":[82003,1485533005139],
+	"pictureList":["http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000",
+	"http://common.cnblogs.com/images/icon_weibo_24.png"]
+	},
+ "[]":
+    {"0":
+        {"Moment":
+			{"id":235,
+			"userId":38710,
+			"date":1486541171000,
+			"pictureList":["http://static.oschina.net/uploads/img/201604/22172508_mpwj.jpg",
+			"https://camo.githubusercontent.com/f513fa631bd780dc0ec3cf2663777e356dc3664f/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343733323232332d3337333933303233322e6a7067"]
+			},
+		  "[]":
+			{"0":
+				{"Comment":
+					{"id":160,
+					"parentId":0,
+					"momentId":235,
+					"userId":82001,
+					"toUserId":38710,
+					"content":"This is a Content...-160",
+					"date":1488434166000,
+					"workId":235
+					}
+				},
+			"1":
+				{"Comment":
+					{"id":163,
+					 "parentId":0,
+					 "momentId":235,
+					 "userId":82001,
+					 "toUserId":38710,
+					 "content":"This is a Content...-163",
+					 "date":1488434166000,
+					 "workId":235
+					}
+				}
+			}
+		},
+		
+	},
+	{"1":
+        {"Moment":
+			{"id":235,
+			"userId":38710,
+			"date":1486541171000,
+			"pictureList":["http://static.oschina.net/uploads/img/201604/22172508_mpwj.jpg",
+			"https://camo.githubusercontent.com/f513fa631bd780dc0ec3cf2663777e356dc3664f/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343733323232332d3337333933303233322e6a7067"]
+			},
+		  "[]":
+			{"0":
+				{"Comment":
+					{"id":160,
+					"parentId":0,
+					"momentId":235,
+					"userId":82001,
+					"toUserId":38710,
+					"content":"This is a Content...-160",
+					"date":1488434166000,
+					"workId":235
+					}
+				},
+			"1":
+				{"Comment":
+					{"id":163,
+					 "parentId":0,
+					 "momentId":235,
+					 "userId":82001,
+					 "toUserId":38710,
+					 "content":"This is a Content...-163",
+					 "date":1488434166000,
+					 "workId":235
+					}
+				}
+			}
+		},
+		
+	},
+	"status":200,"message":"success"
+}

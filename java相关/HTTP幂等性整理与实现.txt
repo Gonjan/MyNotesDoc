@@ -1,0 +1,40 @@
+幂等性的设计：
+RESTful的Web API设计都应该考虑幂等性。下面将介绍HTTP GET、DELETE、PUT、POST四种主要方法的语义和幂等性。
+
+HTTP GET方法用于获取资源，不应有副作用，所以是幂等的。比如：GET http://www.bank.com/account/123456，不会改变资源的状态，不论调用一次还是N次都没有副作用。请注意，这里强调的是一次和N次具有相同的副作用，而不是每次GET的结果相同。GET http://www.news.com/latest-news这个HTTP请求可能会每次得到不同的结果，但它本身并没有产生任何副作用，因而是满足幂等性的。
+
+HTTP DELETE方法用于删除资源，有副作用，但它应该满足幂等性。比如：DELETE http://www.forum.com/article/4231，调用一次和N次对系统产生的副作用是相同的，即删掉id为4231的帖子；因此，调用者可以多次调用或刷新页面而不必担心引起错误。
+
+比较容易混淆的是HTTP POST和PUT。POST和PUT的区别容易被简单地误认为“POST表示创建资源，PUT表示更新资源”；而实际上，二者均可用于创建资源，更为本质的差别是在幂等性方面。
+POST所对应的URI并非创建的资源本身，而是资源的接收者。比如：POST http://www.forum.com/articles的语义是在http://www.forum.com/articles下创建一篇帖子，HTTP响应中应包含帖子的创建状态以及帖子的URI。两次相同的POST请求会在服务器端创建两份资源，它们具有不同的URI；所以，POST方法不具备幂等性。而PUT所对应的URI是要创建或更新的资源本身。比如：PUT http://www.forum/articles/4231的语义是创建或更新ID为4231的帖子。对同一URI进行多次PUT的副作用和一次PUT是相同的；因此，PUT方法具有幂等性。
+
+再通俗点说，如果URL可以在客户端确定，那么就使用PUT，如果是在服务端确定，那么就使用POST，比如说很多资源使用数据库自增主键作为标识信息，而创建的资源的标识信息到底是什么只能由服务端提供，这个时候就必须使用POST。 
+要使用PUT请求，你必须发送所有可访问属性/值，而不仅仅是你想要改变的那些。
+
+
+会员系统中：创建新的会员: POST       localhost:ZRJCashVip/vip/add/13629731449        创建一个电话为1**的会员
+			更新会员信息，PUT        localhost:ZRJCashVip/vip/update/13629731449     根据电话号码查询
+			删除会员信息：DELETE	 localhost:ZRJCashVip/vip/delete/13629731449     删除电话为13**的会员
+			查询会员信息：GET        localhost:ZRJCashVip/vip/select/13629731449     查询会员信息
+			
+			会员充值，必须满足URL的幂等性，该如何保证？？？？
+			简单的做法：
+			对post数据所有参数进行一个md5加密，每次充值操作就将当前得到的MD5值和根据分店id去静态map里面查找上一次充值时的MD5串，若不相同，直接操作，更新MD5串，若相同，得到时间戳，若5分钟以内，就不执行操作，否则执行，并更新时间戳。
+			map可以考虑是concurrentHaspMap
+			
+			
+			if(!map.get(subbranchId).equals(manualMD5)  ||  (map.get(subbranchId).equals(manualMD5) && currenttime - map.get(subbranchIdTime) >= 300000 )) {
+				//charge
+			} else {
+				return;
+			}
+			
+			另，参考：
+			深入解析web，282页，表单重复提交的问题
+			请求页面生成唯一token，并将token保存到用户的session中。
+			当用户提交请求时，验证session中的token和请求是否一致。
+			一致则处理，不一致则不处理。（每次点提交就会更新一下token，但不写到session中），只有第一次访问表单页面时候才将生成的token存入session，要想重复提交，必须刷新一下页面。
+			
+			
+			
+			

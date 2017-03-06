@@ -1,0 +1,87 @@
+ThreadLocal：
+
+关于对ThreadLocal变量的理解，我今天查看一下午的博客，自己也写了demo来测试来看自己的理解到底是不是那么回事。从看到博客引出不解，到仔细查看ThreadLocal源码（JDK1.8），我觉得我很有必要记录下来我这大半天的收获，
+今天我研究的最多的就是这两篇文章说理解。我在这里暂称为A文章和B文章。以下是两篇博文地址，我是在看完A文章后，很有疑问，特别是在A文章后的各位网页的评论中，更加坚定我要弄清楚ThreadLocal到底是怎么一回事。
+A文章：http://blog.csdn.net/lufeng20/article/details/24314381
+B文章：http://www.cnblogs.com/dolphin0520/p/3920407.html
+
+首先，我们从字面上的意思来理解ThreadLocal，Thread：线程，这个毫无疑问。那Local呢？本地的，局部的。也就是说，ThreadLocal是线程本地的变量，只要是本线程内都可以使用，线程结束了，那么相应的线程本地变量也就跟随着线程消失了。
+
+
+我想大家都知道，多线程情况下，对共享变量的访问是需要同步的，不然会引起不可预知的问题。
+
+接下来我就是，我极力想要说明的：ThreadLocal不是用来解决这个问题的！！！！！  ThreadLocal可以在本线程持有一个共享变量的副本，对吧。大家都这么说。我觉得干脆说明白点，是ThreadLocal又保存了一个共享变量的引用值，共享变量的实例对象之在内存中只有一个。
+
+下面我们先测试一下，并且结合源码看看：
+我先定义一个Person类，我们假定这个Person是要被共享的吧···哈哈
+
+class Person {
+    private String name;
+    Person(String name) {
+        this.name = name;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    } 
+}
+
+
+/**
+ * Person 是共享变量
+ * @author bubble
+ *
+ */
+class Target implements Runnable {
+    private static Person person = new Person("张三");
+    public Target() {}
+    
+    @Override
+    public void run() {
+	//线程中创建一个ThreadLocal变量，并将共享变量创建一个本线程副本
+       ThreadLocal<Person> df = new ThreadLocal<Person>();
+       df.set(person);
+	//对本线程副本中的值进行改变
+       df.get().setName("李四");
+System.out.println("线程" + Thread.currentThread().getName() + "更改ThreadLocal中Person的名字为：" + df.get().getName());	   
+    }
+	
+    public Person getPerson() {
+        return person;
+    }  
+}
+
+
+public class ThreadLocalTest {
+    
+    
+    public static void main(String[] args) throws InterruptedException {
+        Target target = new Target();
+        Thread thread = new Thread(target);
+        thread.start();    //创建一个线程，改变线程中共享变量的值   
+        t1.join();  //等待线程执行完毕
+		//主线程访问共享变量，发现Person的值被改变
+         System.out.println("线程" + Thread.currentThread().getName() + "中共享变量Person的名字：" + target.getPerson().getName());
+    }      
+}
+
+
+
+
+
+
+
+ThreadLocal类中并没有中ThreadLocalMap，ThreadLocalMap是Thread对象持有的。
+在ThreadLocal调用set方法时会检查当前线程是否已经持有一个ThreadLocal，
+
+ThreadLocal在调用get时，是从当前线程获得ThreadLocalMap并把当前调用的ThreadLocal作为key去获得value；
+
+这就是，同一个线程里可以有多个ThreadLocal变量。
+
+ThreadLocalMap确实是ThreadLocal中的静态内部类，Thread中局部对象包括这个ThreadLocalMap。
+
+ThreadLocal 的工作原理在于：每个Thread调用到ThreadLocal 的set ( T )方法时，其实内部实现的就是ThreadLocal 对象创建一个ThreadLocalMap对象塞到调用的那个Thread局部对象中。真正保存的数值都存在每个Thread自己那边，当然线程之间没什么影响啊。
+
+说明下ThreadLocalMap 中保存的值：类似于 Map(key,value) 保存的，key=ThreadLocal 对象，value=你传递的值对象。 这个ThreadLocalMap 保存在每个调用的Thread那边！
